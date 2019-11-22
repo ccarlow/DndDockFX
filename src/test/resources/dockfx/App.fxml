@@ -1,0 +1,58 @@
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import dockfx.*?>
+<?import javafx.scene.canvas.Canvas?>
+<DockGroup fx:id="dockGroup" groupName="App" xmlns:fx="http://javafx.com/fxml" fx:controller="dockfx.AppController">
+	<children>
+		<DockPane fx:id="mainDockPane" title="test">
+			<content>
+				<Label text="testing..."/>
+			</content>
+		</DockPane>
+		
+		<DockGroup fx:id="dockGroup2" groupName="App1">
+			<DockPane fx:id="childDockPane" title="test2">
+				<content>
+					<Label text="testing2..."/>
+				</content>
+			</DockPane>
+			
+			<DockPane fx:id="childDockPane2" title="test3">
+				<content>
+					<Label text="testing3..."/>
+				</content>
+			</DockPane>
+		</DockGroup>
+		
+		<DockPane fx:id="childDockPane3" title="test4">
+			<content>
+				<Label text="testing4..."/>
+			</content>
+		</DockPane>
+		
+		<DockPane fx:id="childDockPan5" title="test5">
+			<content>
+				<Label text="testing5..."/>
+			</content>
+		</DockPane>
+		
+		<DockPane fx:id="childDockPane6" title="test6">
+			<content>
+				<Label text="testing6..."/>
+			</content>
+		</DockPane>
+		
+		<DockPane fx:id="childDockPane7" title="test7">
+			<content>
+				<Label text="testing7..."/>
+			</content>
+		</DockPane>
+		
+		<DockPane fx:id="childDockPane8" title="test8">
+			<content>
+				<Label text="testing8..."/>
+			</content>
+		</DockPane>
+	</children>
+</DockGroup>
