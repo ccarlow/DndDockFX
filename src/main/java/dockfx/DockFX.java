@@ -104,12 +104,32 @@ public class DockFX {
     dockLayoutList.clear();
     for (DockPane dockPane : dockPanes) {
       if (dockPane.getParentDockPane() == null) {
-        setDockLayout(dockPane);
-        dockLayoutList.add(dockPane.getDockLayout());
-
-        Scene scene = dockPane.getScene();
-        if (scene == null || scene.getWindow() == null || !scene.getWindow().isShowing()) {
-          dockPane.getDockLayout().setIsClosed(true);
+        DockLayout dockLayout = null;
+        if (dockPane instanceof ParentDockPane) {
+          ParentDockPane parentDockPane = (ParentDockPane) dockPane;
+          dockLayout = parentDockPane.setDockLayout();
+          dockLayout.setType(parentDockPane.getClass().getSimpleName());
+        } else {
+          dockLayout = new DockLayout();
+        }
+        dockLayout.setId(dockPane.getId());
+        
+        if (dockPane.getParentDockPane() == null) {
+          Scene scene = dockPane.getScene();
+          if (scene != null && scene.getWindow() != null) {
+            dockLayout.setX(scene.getWindow().getX());
+            dockLayout.setY(scene.getWindow().getY());
+            dockLayout.setWidth(scene.getWindow().getWidth());
+            dockLayout.setHeight(scene.getWindow().getHeight());
+          } else {
+            dockLayout.setX(dockPane.getOriginalStage().getX());
+            dockLayout.setY(dockPane.getOriginalStage().getY());
+            dockLayout.setWidth(dockPane.getOriginalStage().getWidth());
+            dockLayout.setHeight(dockPane.getOriginalStage().getHeight());
+          }
+          if (scene == null || scene.getWindow() == null || !scene.getWindow().isShowing()) {
+            dockLayout.setIsClosed(true);
+          }
         }
       }
     }
@@ -119,43 +139,6 @@ public class DockFX {
       encoder.writeObject(dockLayoutList);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
-    }
-  }
-
-  public void setDockLayout(DockPane dockPane) {
-    DockLayout dockLayout = new DockLayout();
-    dockLayout.setId(dockPane.getId());
-    dockPane.setDockLayout(dockLayout);
-    if (dockPane.getParentDockPane() == null) {
-      Scene scene = dockPane.getScene();
-      if (scene != null && scene.getWindow() != null) {
-        dockLayout.addProperty(DockLayout.X_PROP_NAME, scene.getWindow().getX());
-        dockLayout.addProperty(DockLayout.Y_PROP_NAME, scene.getWindow().getY());
-        dockLayout.addProperty(DockLayout.WIDTH_PROP_NAME, scene.getWindow().getWidth());
-        dockLayout.addProperty(DockLayout.HEIGHT_PROP_NAME, scene.getWindow().getHeight());
-      } else {
-        dockLayout.addProperty(DockLayout.X_PROP_NAME, dockPane.getOriginalStage().getX());
-        dockLayout.addProperty(DockLayout.Y_PROP_NAME, dockPane.getOriginalStage().getY());
-        dockLayout.addProperty(DockLayout.WIDTH_PROP_NAME, dockPane.getOriginalStage().getWidth());
-        dockLayout.addProperty(DockLayout.HEIGHT_PROP_NAME,
-            dockPane.getOriginalStage().getHeight());
-      }
-    }
-
-    if (dockPane instanceof ParentDockPane) {
-      ParentDockPane parentDockPane = (ParentDockPane) dockPane;
-      if (!parentDockPane.getChildDockPanes().isEmpty()) {
-        for (DockPane child : parentDockPane.getChildDockPanes()) {
-          setDockLayout(child);
-          dockLayout.getChildren().add(child.getDockLayout());
-        }
-        dockLayout.setType(parentDockPane.getClass().getSimpleName());
-        if (dockPane.getContent() instanceof SplitPane) {
-          SplitPane splitPane = (SplitPane) dockPane.getContent();
-          dockLayout.getProperties().put("orientation", splitPane.getOrientation());
-          dockLayout.addProperty("dividerPositions", splitPane.getDividerPositions());
-        }
-      }
     }
   }
 
@@ -170,10 +153,10 @@ public class DockFX {
       for (DockPane dockPane : dockPanes) {
         DockLayout dockLayout = new DockLayout();
         dockLayout.setId(dockPane.getId());
-        dockLayout.getProperties().put(DockLayout.X_PROP_NAME, 0.0);
-        dockLayout.getProperties().put(DockLayout.Y_PROP_NAME, 0.0);
-        dockLayout.getProperties().put(DockLayout.WIDTH_PROP_NAME, 500.0);
-        dockLayout.getProperties().put(DockLayout.HEIGHT_PROP_NAME, 500.0);
+        dockLayout.setX(0.0);
+        dockLayout.setY(0.0);
+        dockLayout.setWidth(500.0);
+        dockLayout.setHeight(500.0);
         dockLayoutList.add(dockLayout);
       }
     }
@@ -192,16 +175,10 @@ public class DockFX {
       loadDockLayoutChildren(dockLayout);
 
       DockPane dockPane = getDockPaneById(dockLayout.getId());
-      // dockController.hideTitleBar(false);
-      Properties properties = dockLayout.getProperties();
-      double xPos = (double) properties.get(DockLayout.X_PROP_NAME);
-      double yPos = (double) properties.get(DockLayout.Y_PROP_NAME);
-      double width = (double) properties.get(DockLayout.WIDTH_PROP_NAME);
-      double height = (double) properties.get(DockLayout.HEIGHT_PROP_NAME);
-      dockPane.getOriginalStage().setX(xPos);
-      dockPane.getOriginalStage().setY(yPos);
-      dockPane.getOriginalStage().setWidth(width);
-      dockPane.getOriginalStage().setHeight(height);
+      dockPane.getOriginalStage().setX(dockLayout.getX());
+      dockPane.getOriginalStage().setY(dockLayout.getY());
+      dockPane.getOriginalStage().setWidth(dockLayout.getWidth());
+      dockPane.getOriginalStage().setHeight(dockLayout.getHeight());
       if (!dockLayout.getIsClosed()) {
         newDockStage(dockPane);
       }
@@ -222,14 +199,13 @@ public class DockFX {
     if (!dockLayout.getChildren().isEmpty()) {
       DockPane group = getDockPaneById(dockLayout.getId());
       DockPane previousChild = null;
-      Orientation orientation = (Orientation) dockLayout.getProperties().get("orientation");
       for (DockLayout childLayout : dockLayout.getChildren()) {
         loadDockLayoutChildren(childLayout);
         DockPane child = getDockPaneById(childLayout.getId());
         if (previousChild != null) {
           targetDockPos =
               dockLayout.getType().equals("SplitPane")
-                  ? orientation.equals(Orientation.HORIZONTAL) ? DockPos.SPLIT_RIGHT
+                  ? dockLayout.getOrientation().equals(Orientation.HORIZONTAL) ? DockPos.SPLIT_RIGHT
                       : DockPos.SPLIT_BOTTOM
                   : DockPos.TAB_AFTER;
           setTargetDockPane(previousChild);
@@ -237,7 +213,7 @@ public class DockFX {
           if (group == null) {
             group = child.getParentDockPane();
             group.setId(dockLayout.getId());
-            group.setDockLayout(dockLayout);
+//            group.setDockLayout(dockLayout);
             // group.hideTitleBar(true);
           }
         }

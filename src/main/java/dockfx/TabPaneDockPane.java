@@ -42,4 +42,22 @@ public class TabPaneDockPane extends ParentDockPane {
       }
     }
   }
+  
+  @Override
+  public DockLayout setDockLayout() {
+    DockLayout dockLayout = new DockLayout();
+    
+    for (DockPane dockPane : getChildDockPanes()) {
+      DockLayout childDockLayout = null;
+      if (dockPane instanceof ParentDockPane) {
+        childDockLayout = ((ParentDockPane)dockPane).setDockLayout();
+      } else {
+        childDockLayout = new DockLayout();
+      }
+      childDockLayout.setId(dockPane.getId());
+      dockLayout.getChildren().add(childDockLayout);
+    }
+    
+    return dockLayout;
+  }
 }

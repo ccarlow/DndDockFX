@@ -32,7 +32,7 @@ public class DockPane extends StackPane {
   private String title;
   private Node content;
   protected ParentDockPane parentDockPane;
-  private DockLayout dockLayout;
+//  private DockLayout dockLayout;
   private DockGroup dockGroup;
   private Rectangle originalStage = new Rectangle();
   private DockPaneArea dockPaneArea = new DockPaneArea();
@@ -66,16 +66,16 @@ public class DockPane extends StackPane {
     return parentDockPane;
   }
 
-  public DockLayout getDockLayout() {
-    return dockLayout;
-  }
+//  public DockLayout getDockLayout() {
+//    return dockLayout;
+//  }
+//  
+//  public void setDockLayout(DockLayout dockLayout) {
+//    this.dockLayout = dockLayout;
+//  }
 
   public DockPaneArea getDockArea() {
     return dockPaneArea;
-  }
-
-  public void setDockLayout(DockLayout dockLayout) {
-    this.dockLayout = dockLayout;
   }
 
   public Rectangle getOriginalStage() {

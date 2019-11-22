@@ -42,11 +42,9 @@ abstract class ParentDockPane extends DockPane {
     return childDockPanes;
   }
 
-  public void addChildDockPane(DockPane childDockPane, DockPane targetDockPane, DockPos dockPos) {
+  abstract public void addChildDockPane(DockPane childDockPane, DockPane targetDockPane, DockPos dockPos);
 
-  }
-
-  public void removeChildDockPane(DockPane childDockPane) {
-
-  }
+  abstract public void removeChildDockPane(DockPane childDockPane);
+  
+  abstract public DockLayout setDockLayout();
 }

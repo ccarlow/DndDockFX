@@ -165,4 +165,39 @@ public class SplitPaneDockPane extends ParentDockPane {
     }
     return newPositions;
   }
+  
+  @Override
+  public DockLayout setDockLayout() {
+    DockLayout dockLayout = new DockLayout();
+    dockLayout.setType("SplitPane");
+    SplitPane splitPane = ((SplitPane)getTab().getContent());
+    dockLayout.setOrientation(splitPane.getOrientation());
+    dockLayout.setDividerPositions(splitPane.getDividerPositions());
+    setDockLayout(dockLayout, splitPane);
+    return dockLayout;
+  }
+  
+  private void setDockLayout(DockLayout parentDockLayout, SplitPane parentSplitPane) {
+    for (Node item : parentSplitPane.getItems()) {
+      if (item instanceof SplitPane) {
+        DockLayout dockLayout = new DockLayout();
+        parentDockLayout.getChildren().add(dockLayout);
+        dockLayout.setType("SplitPane");
+        SplitPane splitPane = ((SplitPane)getTab().getContent());
+        dockLayout.setOrientation(splitPane.getOrientation());
+        dockLayout.setDividerPositions(splitPane.getDividerPositions());
+        setDockLayout(dockLayout, splitPane);
+      } else if (item instanceof TabPane) {
+        DockPane dockPane = ((DockPaneTab)((TabPane)item).getTabs().get(0)).getDockPane();
+        DockLayout dockLayout = null;
+        if (dockPane instanceof ParentDockPane) {
+          dockLayout = ((ParentDockPane)dockPane).setDockLayout();
+        } else {
+          dockLayout = new DockLayout();
+        }
+        parentDockLayout.getChildren().add(dockLayout);
+        dockLayout.setId(dockPane.getId());
+      }
+    }
+  }
 }
