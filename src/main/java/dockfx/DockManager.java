@@ -30,8 +30,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class DockFX {
-  private static DockFX instance;
+public class DockManager {
+  private static DockManager instance;
   private static DockPane sourceDockPane;
   private static DockPane targetDockPane;
   private static DockPos targetDockPos;
@@ -45,7 +45,7 @@ public class DockFX {
     SPLIT_TOP, SPLIT_BOTTOM, SPLIT_LEFT, SPLIT_RIGHT, TAB_BEFORE, TAB_AFTER;
   }
 
-  public DockFX() {}
+  private DockManager() {}
 
   public void addDockPane(DockPane dockPane) {
     dockPanes.add(dockPane);
@@ -59,9 +59,9 @@ public class DockFX {
     return layoutConfigFile;
   }
 
-  public static DockFX getInstance() {
+  public static DockManager getInstance() {
     if (instance == null) {
-      instance = new DockFX();
+      instance = new DockManager();
       dockPanes = new ArrayList<DockPane>();
       dockPaneTabContextMenu = instance.new DockPaneTabContextMenu();
       dockPaneTabDragOverContextMenu = instance.new DockPaneTabDragOverContextMenu();
@@ -328,7 +328,7 @@ public class DockFX {
       menuItem.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-          DockFX.getInstance().saveDockLayout();
+          DockManager.getInstance().saveDockLayout();
         }
       });
       getItems().add(menuItem);
@@ -337,7 +337,7 @@ public class DockFX {
       menuItem.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-          DockFX.getInstance().loadDockLayout();
+          DockManager.getInstance().loadDockLayout();
         }
       });
       getItems().add(menuItem);
@@ -466,7 +466,7 @@ public class DockFX {
           if (event.getTarget() instanceof Node) {
             Node node = ((Node) event.getTarget());
             if (node.getStyleClass().contains("menu-item")) {
-              DockFX.getInstance().setTargetDockPos(getMenuItemDockPos(node));
+              DockManager.getInstance().setTargetDockPos(getMenuItemDockPos(node));
               targetDragDropped = true;
             }
           }

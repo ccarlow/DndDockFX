@@ -2,9 +2,9 @@ package dockfx;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
-import dockfx.DockFX.DockPaneTabContextMenu;
-import dockfx.DockFX.DockPaneTabDragOverContextMenu;
-import dockfx.DockFX.DockPos;
+import dockfx.DockManager.DockPaneTabContextMenu;
+import dockfx.DockManager.DockPaneTabDragOverContextMenu;
+import dockfx.DockManager.DockPos;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -41,7 +41,7 @@ public class DockPane extends StackPane {
   public static final String DOCK_HIDDEN_HEADER_TABPANE_STYLE_CLASS = "dock-hidden-header-tab-pane";
 
   public DockPane() {
-    DockFX.getInstance().addDockPane(this);
+    DockManager.getInstance().addDockPane(this);
     dockPaneTab.setContent(this);
     getChildren().add(dockPaneArea);
     dockPaneArea.setVisible(false);
@@ -116,11 +116,11 @@ public class DockPane extends StackPane {
     if (getScene() != null && getScene().getWindow() != null) {
       getScene().getWindow().hide();
     }
-    DockPos targetDockPos = DockFX.getInstance().getTargetDockPos();
-    DockPane targetDockPane = DockFX.getInstance().getTargetDockPane();
+    DockPos targetDockPos = DockManager.getInstance().getTargetDockPos();
+    DockPane targetDockPane = DockManager.getInstance().getTargetDockPane();
     if (targetDockPos != null) {
       ParentDockPane parentDockPane = (ParentDockPane) targetDockPane.getParentDockPane();
-      if (DockFX.isSplitDockPos(targetDockPos)) {
+      if (DockManager.isSplitDockPos(targetDockPos)) {
         if (!(parentDockPane instanceof SplitPaneDockPane)) {
           parentDockPane = new SplitPaneDockPane(targetDockPane);
         }
@@ -138,8 +138,8 @@ public class DockPane extends StackPane {
     originalStage.setHeight(getHeight());
 
     parentDockPane.removeChildDockPane(this);
-    DockFX.getInstance().setTargetDockPane(null);
-    DockFX.getInstance().setSourceDockPane(null);
+    DockManager.getInstance().setTargetDockPane(null);
+    DockManager.getInstance().setSourceDockPane(null);
   }
 
   class DockPaneArea extends StackPane {
@@ -254,8 +254,8 @@ public class DockPane extends StackPane {
       stackPane.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
         @Override
         public void handle(ContextMenuEvent event) {
-          DockFX.getInstance().setSourceDockPane(DockPane.this);
-          DockPaneTabContextMenu contextMenu = DockFX.getInstance().getDockPaneTabContextMenu();
+          DockManager.getInstance().setSourceDockPane(DockPane.this);
+          DockPaneTabContextMenu contextMenu = DockManager.getInstance().getDockPaneTabContextMenu();
           if (contextMenu.isShowing()) {
             contextMenu.hide();
           }
@@ -290,7 +290,7 @@ public class DockPane extends StackPane {
 
           db.setDragViewOffsetX(event.getX());
           db.setDragViewOffsetY(event.getY());
-          DockFX.getInstance().setSourceDockPane(DockPane.this);
+          DockManager.getInstance().setSourceDockPane(DockPane.this);
 
           if (parentDockPane != null) {
             undock();
@@ -306,34 +306,34 @@ public class DockPane extends StackPane {
           Point point = MouseInfo.getPointerInfo().getLocation();
           double xPos = point.getX() - originalStage.getX();
           double yPos = point.getY() - originalStage.getY();
-          DockPane target = DockFX.getInstance().getTargetDockPane();
+          DockPane target = DockManager.getInstance().getTargetDockPane();
           if (target == null) {
             Stage stage = null;
             if (stackPane.getScene() != null && stackPane.getScene().getWindow() != null) {
               stage = (Stage) stackPane.getScene().getWindow();
               stage.show();
             } else {
-              stage = DockFX.newDockStage(DockPane.this);
+              stage = DockManager.newDockStage(DockPane.this);
             }
             stage.setX(xPos);
             stage.setY(yPos);
           } else {
             dock();
           }
-          DockFX.getInstance().setTargetDockPane(null);
-          DockFX.getInstance().setSourceDockPane(null);
+          DockManager.getInstance().setTargetDockPane(null);
+          DockManager.getInstance().setSourceDockPane(null);
         }
       });
 
       stackPane.setOnDragEntered(new EventHandler<DragEvent>() {
         @Override
         public void handle(DragEvent event) {
-          if (!DockPane.this.equals(DockFX.getInstance().getSourceDockPane())) {
-            DockFX.getInstance().setTargetDockPane(DockPane.this);
+          if (!DockPane.this.equals(DockManager.getInstance().getSourceDockPane())) {
+            DockManager.getInstance().setTargetDockPane(DockPane.this);
             // Subtracting 20 from the screen x and y coordinates to force the menu drag over event
             // Maybe there is a better way of setting the offset rather than hardcoding to 20
             DockPaneTabDragOverContextMenu dockPaneTabDragOverContextMenu =
-                DockFX.getInstance().getDockPaneTabDragOverContextMenu();
+                DockManager.getInstance().getDockPaneTabDragOverContextMenu();
             if (dockPaneTabDragOverContextMenu.isShowing()) {
               dockPaneTabDragOverContextMenu.hide();
             }

@@ -1,6 +1,6 @@
 package dockfx;
 
-import dockfx.DockFX.DockPos;
+import dockfx.DockManager.DockPos;
 import javafx.scene.control.TabPane;
 
 public class TabPaneDockPane extends ParentDockPane {
@@ -16,7 +16,7 @@ public class TabPaneDockPane extends ParentDockPane {
 
   @Override
   public void addChildDockPane(DockPane childDockPane, DockPane targetDockPane, DockPos dockPos) {
-    int index = DockFX.getDockPosIndex(dockPos);
+    int index = DockManager.getDockPosIndex(dockPos);
     TabPane tabPane = targetDockPane.getTab().getTabPane();
     index += tabPane.getTabs().indexOf(targetDockPane.getTab());
     tabPane.getTabs().add(index, childDockPane.getTab());

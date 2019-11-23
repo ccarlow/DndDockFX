@@ -1,7 +1,7 @@
 package dockfx;
 
 import java.util.UUID;
-import dockfx.DockFX.DockPos;
+import dockfx.DockManager.DockPos;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;

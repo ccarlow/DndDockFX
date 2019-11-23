@@ -17,8 +17,8 @@ public class App extends Application {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    DockFX.getInstance().setLayoutConfigFile("resources/config/dockfx/app.xml");
-    DockFX.getInstance().loadDockLayout();
+    DockManager.getInstance().setLayoutConfigFile("resources/config/dockfx/app.xml");
+    DockManager.getInstance().loadDockLayout();
   }
 
   public static void main(String[] args) {
