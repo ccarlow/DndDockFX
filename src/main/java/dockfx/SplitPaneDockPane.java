@@ -1,5 +1,7 @@
 package dockfx;
 
+import java.util.ArrayList;
+import java.util.List;
 import dockfx.DockFX.DockPos;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -170,7 +172,7 @@ public class SplitPaneDockPane extends ParentDockPane {
   public DockLayout setDockLayout() {
     DockLayout dockLayout = new DockLayout();
     dockLayout.setType("SplitPane");
-    SplitPane splitPane = ((SplitPane)getTab().getContent());
+    SplitPane splitPane = ((SplitPane)getContent());
     dockLayout.setOrientation(splitPane.getOrientation());
     dockLayout.setDividerPositions(splitPane.getDividerPositions());
     setDockLayout(dockLayout, splitPane);
@@ -183,7 +185,7 @@ public class SplitPaneDockPane extends ParentDockPane {
         DockLayout dockLayout = new DockLayout();
         parentDockLayout.getChildren().add(dockLayout);
         dockLayout.setType("SplitPane");
-        SplitPane splitPane = ((SplitPane)getTab().getContent());
+        SplitPane splitPane = ((SplitPane)item);
         dockLayout.setOrientation(splitPane.getOrientation());
         dockLayout.setDividerPositions(splitPane.getDividerPositions());
         setDockLayout(dockLayout, splitPane);
@@ -197,7 +199,87 @@ public class SplitPaneDockPane extends ParentDockPane {
         }
         parentDockLayout.getChildren().add(dockLayout);
         dockLayout.setId(dockPane.getId());
+        if (dockPane instanceof ParentDockPane) {
+          dockLayout.setType(dockPane.getClass().getSimpleName());
+        }
       }
+    }
+  }
+
+  @Override
+  public void mergeIntoParent() {
+    if (getParentDockPane() != null) {
+      TabPane tabPane = getTab().getTabPane();
+      SplitPane splitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+      if (splitPane != null) {
+        int index = splitPane.getItems().indexOf(tabPane);
+        
+        SplitPane childSplitPane = (SplitPane)getContent();
+        double[] dividerPositions = splitPane.getDividerPositions();
+        if (childSplitPane.getOrientation().equals(splitPane.getOrientation())) {
+          
+          for (int i = 0; i < dividerPositions.length; i++) {
+            System.out.println(i + " = " + dividerPositions[i]);
+          }
+          
+          double[] childDividerPositions = childSplitPane.getDividerPositions();
+          int dividerIndex = index - 1;
+          double minPos = 0;
+          double maxPos = 1;
+          if (dividerIndex > 0) {
+            minPos = dividerPositions[dividerIndex]; 
+          } 
+          if (dividerIndex + 1 < dividerPositions.length) {
+            maxPos = dividerPositions[dividerIndex + 1];
+          }
+          double width = maxPos - minPos;
+          for (int i = 0; i < childDividerPositions.length; i++) {
+            childDividerPositions[i] = minPos + (childDividerPositions[i] * width); 
+          }
+          
+          System.out.println("size = " + (dividerPositions.length + childDividerPositions.length));
+          
+          double[] newDividerPositions = new double[dividerPositions.length + childDividerPositions.length];
+          int childDividerIndex = -1;
+          for (int i = 0; i < newDividerPositions.length; i++) {
+            newDividerPositions[i] = 0;
+            
+            if (i >= dividerIndex) {
+              if (childDividerIndex < childDividerPositions.length - 1) {
+                newDividerPositions[i] = childDividerPositions[++childDividerIndex];
+              } else {
+                newDividerPositions[i] = dividerPositions[i - childDividerPositions.length];
+              }
+            } else {
+              newDividerPositions[i] = dividerPositions[i];
+            }
+          }
+          
+          for (int i = 0; i < newDividerPositions.length; i++) {
+            System.out.println(i + " = " + newDividerPositions[i]);
+          }
+          
+          List<Node> items = new ArrayList<Node>(childSplitPane.getItems());
+          for (int i = items.size() - 1; i >= 0; i--) {
+            items.get(i).getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
+            splitPane.getItems().add(index, items.get(i));
+          }
+          splitPane.getItems().remove(tabPane);
+          
+          splitPane.setDividerPositions(newDividerPositions);
+        } else {
+          childSplitPane.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
+          splitPane.getItems().set(index, childSplitPane);
+          splitPane.setDividerPositions(dividerPositions);
+        }
+        
+        List<DockPane> childDockPanes = new ArrayList<DockPane>(getChildDockPanes());
+        for (DockPane dockPane : childDockPanes) {
+          getParentDockPane().getChildDockPanes().add(dockPane);
+        }
+        DockFX.getInstance().removeDockPaneById(getId());
+        getParentDockPane().getChildDockPanes().remove(this);
+      } 
     }
   }
 }

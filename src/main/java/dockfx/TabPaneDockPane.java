@@ -60,4 +60,8 @@ public class TabPaneDockPane extends ParentDockPane {
     
     return dockLayout;
   }
+
+  @Override
+  public void mergeIntoParent() {
+  }
 }

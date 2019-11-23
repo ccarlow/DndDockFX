@@ -112,6 +112,7 @@ public class DockFX {
         } else {
           dockLayout = new DockLayout();
         }
+        dockLayoutList.add(dockLayout);
         dockLayout.setId(dockPane.getId());
         
         if (dockPane.getParentDockPane() == null) {
@@ -171,10 +172,14 @@ public class DockFX {
     for (DockPane dockPane : undockList) {
       // dockPane.undock();
     }
+    
     for (DockLayout dockLayout : dockLayoutList) {
-      loadDockLayoutChildren(dockLayout);
-
-      DockPane dockPane = getDockPaneById(dockLayout.getId());
+      DockPane dockPane = null;
+      if (!dockLayout.getChildren().isEmpty()) {
+        loadDockLayoutChildren(dockLayout);
+      }
+      dockPane = getDockPaneById(dockLayout.getId());
+      System.out.println("dockPane = " + dockPane);
       dockPane.getOriginalStage().setX(dockLayout.getX());
       dockPane.getOriginalStage().setY(dockLayout.getY());
       dockPane.getOriginalStage().setWidth(dockLayout.getWidth());
@@ -184,43 +189,48 @@ public class DockFX {
       }
     }
     setTargetDockPane(null);
-
-    for (DockPane dockPane : dockPanes) {
-      if (!dockPane.getChildren().isEmpty()) {
-        if (dockPane.getContent() instanceof SplitPane) {
-          SplitPane splitPane = (SplitPane) dockPane.getContent();
-          // splitPane.setDividerPositions((double[])dockController.getDockLayout().getProperties().get("dividerPositions"));
-        }
-      }
-    }
   }
 
-  public void loadDockLayoutChildren(DockLayout dockLayout) {
+  public DockPane loadDockLayoutChildren(DockLayout dockLayout) {
+    DockPane rootDockPane = null;
     if (!dockLayout.getChildren().isEmpty()) {
-      DockPane group = getDockPaneById(dockLayout.getId());
       DockPane previousChild = null;
+      DockLayout previousChildLayout = null;
       for (DockLayout childLayout : dockLayout.getChildren()) {
-        loadDockLayoutChildren(childLayout);
-        DockPane child = getDockPaneById(childLayout.getId());
+        DockPane child = loadDockLayoutChildren(childLayout);
+        TabPane tabPane = new TabPane();
+        tabPane.getTabs().add(child.getTab());
+        
         if (previousChild != null) {
-          targetDockPos =
-              dockLayout.getType().equals("SplitPane")
-                  ? dockLayout.getOrientation().equals(Orientation.HORIZONTAL) ? DockPos.SPLIT_RIGHT
-                      : DockPos.SPLIT_BOTTOM
+          targetDockPos = dockLayout.getOrientation() != null
+              ? Orientation.HORIZONTAL.equals(dockLayout.getOrientation()) ? DockPos.SPLIT_RIGHT : DockPos.SPLIT_BOTTOM
                   : DockPos.TAB_AFTER;
           setTargetDockPane(previousChild);
           child.dock();
-          if (group == null) {
-            group = child.getParentDockPane();
-            group.setId(dockLayout.getId());
-//            group.setDockLayout(dockLayout);
-            // group.hideTitleBar(true);
+          
+          if (dockLayout.getType() != null && dockLayout.getType().equals(SplitPaneDockPane.class.getSimpleName())) {
+            child.getParentDockPane().setId(dockLayout.getId());
           }
+          
+          if (childLayout.getType() != null && childLayout.getType().equals("SplitPane") && child instanceof SplitPaneDockPane && child.getParentDockPane() != null) {
+            ((SplitPaneDockPane)child).mergeIntoParent();
+          } 
+
+          if (previousChildLayout.getType() != null && previousChildLayout.getType().equals("SplitPane") && previousChild instanceof SplitPaneDockPane && previousChild.getParentDockPane() != null) {
+            ((SplitPaneDockPane)previousChild).mergeIntoParent();
+          }
+          
+          rootDockPane = child.getParentDockPane() == null ? previousChild.getParentDockPane() : child.getParentDockPane();
         }
 
         previousChild = child;
+        previousChildLayout = childLayout;
       }
+    } else {
+      rootDockPane = getDockPaneById(dockLayout.getId());
     }
+    
+    return rootDockPane;
   }
 
   public DockPane getDockPaneById(String id) {
@@ -342,6 +352,18 @@ public class DockFX {
         }
       });
       getItems().add(menuItem);
+      
+      menuItem = new MenuItem("Merge into Parent");
+      menuItem.setOnAction(new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+          if (sourceDockPane.getParentDockPane() != null && sourceDockPane instanceof ParentDockPane) {
+            ((ParentDockPane)sourceDockPane).mergeIntoParent();
+          }
+        }
+      });
+      getItems().add(menuItem);
+      
       getItems().add(dockPaneMenu);
     }
 

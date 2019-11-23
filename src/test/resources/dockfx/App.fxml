@@ -5,33 +5,39 @@
 <?import javafx.scene.canvas.Canvas?>
 <DockGroup fx:id="dockGroup" groupName="App" xmlns:fx="http://javafx.com/fxml" fx:controller="dockfx.AppController">
 	<children>
-		<DockPane fx:id="mainDockPane" title="test">
+		<DockPane fx:id="childDockPane0" title="test0">
 			<content>
-				<Label text="testing..."/>
+				<Label text="testing0..."/>
 			</content>
 		</DockPane>
 		
 		<DockGroup fx:id="dockGroup2" groupName="App1">
-			<DockPane fx:id="childDockPane" title="test2">
+			<DockPane fx:id="childDockPane1" title="test1">
+				<content>
+					<Label text="testing1..."/>
+				</content>
+			</DockPane>
+			
+			<DockPane fx:id="childDockPane2" title="test2">
 				<content>
 					<Label text="testing2..."/>
 				</content>
 			</DockPane>
-			
-			<DockPane fx:id="childDockPane2" title="test3">
-				<content>
-					<Label text="testing3..."/>
-				</content>
-			</DockPane>
 		</DockGroup>
 		
-		<DockPane fx:id="childDockPane3" title="test4">
+		<DockPane fx:id="childDockPane3" title="test3">
+			<content>
+				<Label text="testing3..."/>
+			</content>
+		</DockPane>
+		
+		<DockPane fx:id="childDockPane4" title="test4">
 			<content>
 				<Label text="testing4..."/>
 			</content>
 		</DockPane>
 		
-		<DockPane fx:id="childDockPan5" title="test5">
+		<DockPane fx:id="childDockPane5" title="test5">
 			<content>
 				<Label text="testing5..."/>
 			</content>
@@ -46,12 +52,6 @@
 		<DockPane fx:id="childDockPane7" title="test7">
 			<content>
 				<Label text="testing7..."/>
-			</content>
-		</DockPane>
-		
-		<DockPane fx:id="childDockPane8" title="test8">
-			<content>
-				<Label text="testing8..."/>
 			</content>
 		</DockPane>
 	</children>
