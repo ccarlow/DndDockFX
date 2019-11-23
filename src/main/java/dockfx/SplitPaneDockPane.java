@@ -249,7 +249,7 @@ public class SplitPaneDockPane extends ParentDockPane {
     
     double min = 0;
     double max = 1;
-    if (index - 1 > 0) {
+    if (index - 1 >= 0) {
       min = positions[index - 1]; 
     } 
     if (index < positions.length) {
@@ -258,8 +258,7 @@ public class SplitPaneDockPane extends ParentDockPane {
     
     double width = max - min;
     for (int i = 0; i < childPositions.length; i++) {
-      childPositions[i] = min + (childPositions[i] * width); 
-      System.out.println(i + " = " + childPositions[i]);
+      childPositions[i] = min + (childPositions[i] * width);
     }
     
     int childIndex = -1;
