@@ -26,22 +26,22 @@ The following is a list of the JavaFX docking libraries that were tested and the
 
 DockFX (https://github.com/RobertBColton/DockFX)
 * Differentiates between DockPane and DockNode limiting flexibility of any window targeting any other window for docking.
-* Weak support for multiple DockPanes.
-* Stage.initOwner() must be used when using multiple DockPanes because dock behavior is controls by MouseEvents which are unaware of native window z-indexes and will show * DockPane popup buttons over native windows that are in front.
-* Lacks window z-indexing that causes popup buttons of DockPanes in the background to appear over other DockPanes/DockNodes that are in front.
-* Lacks controls for reopening DockNodes after they are closed
+  * Weak support for multiple DockPanes.
+  * Stage.initOwner() must be used when using multiple DockPanes because dock behavior is controls by MouseEvents which are unaware of native window z-indexes and will show * DockPane popup buttons over native windows that are in front.
+  * Lacks window z-indexing that causes popup buttons of DockPanes in the background to appear over other DockPanes/DockNodes that are in front.
+  * Lacks controls for reopening DockNodes after they are closed
 
-AnchorFX (https://github.com/alexbodogit/AnchorFX)
-* Suffers the same z-indexing issues described for DockFX
-* Dragging malfunctions on Linux
-* Tabs don't support dragging which requires the tab to first be clicked before the window can be dragged
+* AnchorFX (https://github.com/alexbodogit/AnchorFX)
+  * Suffers the same z-indexing issues described for DockFX
+  * Dragging malfunctions on Linux
+  * Tabs don't support dragging which requires the tab to first be clicked before the window can be dragged
 
-DromblerFX (https://github.com/Drombler/drombler-fx)
-* Lacks drag and drop capabilities
-* Differentiates beteween DockAreas and DockPanes.  DockAreas can only be represented as SplitPane items and cannot be reordered.  DockPanes can only exist within their designated DockArea and can only be represented as Tabs which cannot be reordered.
+* DromblerFX (https://github.com/Drombler/drombler-fx)
+  * Lacks drag and drop capabilities
+  * Differentiates beteween DockAreas and DockPanes.  DockAreas can only be represented as SplitPane items and cannot be reordered.  DockPanes can only exist within their designated DockArea and can only be represented as Tabs which cannot be reordered.
 
-FXDock (https://github.com/andy-goryachev/FxDock, +1 for DragEvents over MouseEvents)
-* Bloated codebase (350+ source files) much of which seems irrelevant to docking.
-* Major bug with the dragged window not ignoring its own drag events
-* On Linux the bug causes dragging behavior to malfunction
-* On Window it allows a window to dock to itself causing ghost tabs and split items
+* FXDock (https://github.com/andy-goryachev/FxDock, +1 for DragEvents over MouseEvents)
+  * Bloated codebase (350+ source files) much of which seems irrelevant to docking.
+  * Major bug with the dragged window not ignoring its own drag events
+  * On Linux the bug causes dragging behavior to malfunction
+  * On Window it allows a window to dock to itself causing ghost tabs and split items
