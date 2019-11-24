@@ -1,8 +1,8 @@
-package dockfx;
+package dock;
 
 import java.util.ArrayList;
 import java.util.List;
-import dockfx.DockManager.DockPos;
+import dock.DockManager.DockPos;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.SplitPane;

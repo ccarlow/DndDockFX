@@ -16,22 +16,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <fileExtensions>java, properties, xml</fileExtensions>
     </properties>
-    
+
     <build>
     	<pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>dockfx.App</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
+	        <plugins>
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-jar-plugin</artifactId>
+	                <configuration>
+	                    <archive>
+	                        <manifest>
+	                            <mainClass>dockfx.App</mainClass>
+	                        </manifest>
+	                    </archive>
+	                </configuration>
+	            </plugin>
+	        </plugins>
         </pluginManagement>
     </build>
 </project>

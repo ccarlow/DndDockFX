@@ -1,10 +1,10 @@
-package dockfx;
+package dock;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
-import dockfx.DockManager.DockPaneTabContextMenu;
-import dockfx.DockManager.DockPaneTabDragOverContextMenu;
-import dockfx.DockManager.DockPos;
+import dock.DockManager.DockPaneTabContextMenu;
+import dock.DockManager.DockPaneTabDragOverContextMenu;
+import dock.DockManager.DockPos;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;

@@ -1,4 +1,4 @@
-package dockfx;
+package dock;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -283,7 +283,7 @@ public class DockManager {
     Stage stage = new Stage();
     stage.setTitle(dockPane.getTitle());
     stage.setScene(new Scene(tabPane));
-    stage.getScene().getStylesheets().add("/dockfx/default.css");
+    stage.getScene().getStylesheets().add("/dock/default.css");
 
     stage.show();
     stage.setX(dockPane.getOriginalStage().getX());
@@ -427,8 +427,7 @@ public class DockManager {
     }
   }
 
-  // This ContextMenu exists in the DockFX singleton to guarantee only one ContextMenu is shown at
-  // any time
+  // This ContextMenu exists in the DockFX singleton to guarantee only one ContextMenu is shown at any time
   // Otherwise ContextMenu hide events are missed in some scenarios causing multiple DragOver
   // ContextMenus to be shown which degrades user experience
   class DockPaneTabDragOverContextMenu extends ContextMenu {
