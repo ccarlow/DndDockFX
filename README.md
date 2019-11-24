@@ -8,7 +8,7 @@ Some docking projects use MouseEvents to handle dragging behavior and implement 
 
 This project is cross-platform unlike some docking projects that seem to fail on Linux more often than Windows.
 
-This project uses Tabs as the drag control regardless of being docked in a TabPane or Splitpane or undocked in a separate window.  Using Tabs for all dock states enforces UI consistency and is consistent with other applications like Chrome, Firefox, Gimp, etc.  Some docking projects only use Tabs when docked in a TabPane and a different control when docked in a SplitPane or undocked as a separate windows which can cause confusion.
+This project uses Tabs as the drag control regardless of being docked in a TabPane or Splitpane or undocked in a separate window.  Using Tabs for all dock states enforces UI consistency and is consistent with other applications like Chrome, Firefox, Gimp, etc.  Some docking projects only use Tabs when docked in a TabPane and a different control when docked in a SplitPane or undocked as a separate windows and the inconsistency can cause confusion.
 
 Draggable Tabs are not yet provided by JavaFX so the behavior in this project is a custom implementation.
 
@@ -20,12 +20,10 @@ Interestingly, the the issue above seems to describe partial implementation of a
 Another relevant source related to JavaFX Draggable Tabs:
 https://choudhury.com/blog/2017/02/28/javafx-draggable-tabs/
 
-Supports parenting and merging.
-
 The following is a list of the JavaFX docking libraries that were tested and their shortcomings:
 
-DockFX (https://github.com/RobertBColton/DockFX)
-* Differentiates between DockPane and DockNode limiting flexibility of any window targeting any other window for docking.
+* DockFX (https://github.com/RobertBColton/DockFX)
+  * Differentiates between DockPane and DockNode limiting flexibility of any window targeting any other window for docking.
   * Weak support for multiple DockPanes.
   * Stage.initOwner() must be used when using multiple DockPanes because dock behavior is controls by MouseEvents which are unaware of native window z-indexes and will show DockPane popup buttons over native windows that are in front.
   * Lacks window z-indexing that causes popup buttons of DockPanes in the background to appear over other DockPanes/DockNodes that are in front.
