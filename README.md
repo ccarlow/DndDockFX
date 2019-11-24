@@ -32,7 +32,7 @@ The following is a list of the JavaFX docking libraries that were tested and the
 * AnchorFX (https://github.com/alexbodogit/AnchorFX)
   * Suffers the same z-indexing issues described for DockFX
   * Dragging malfunctions on Linux
-  * Tabs don't support dragging which requires the tab to first be clicked before the window can be dragged
+  * Tabs don't support dragging which requires the tab to first be clicked before the drag control is visible and can then be dragged
 
 * DromblerFX (https://github.com/Drombler/drombler-fx)
   * Lacks drag and drop capabilities
