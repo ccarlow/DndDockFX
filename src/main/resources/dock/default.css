@@ -33,6 +33,10 @@
 */
 }
 
+.dock-pane-menu-item > .label {
+	-fx-font-weight:bold;
+}
+
 .dock-hidden-header-tab-pane {
     -fx-tab-max-height: 0;
 } 

@@ -20,7 +20,8 @@ public class TabPaneDockPane extends ParentDockPane {
     TabPane tabPane = targetDockPane.getTab().getTabPane();
     index += tabPane.getTabs().indexOf(targetDockPane.getTab());
     tabPane.getTabs().add(index, childDockPane.getTab());
-    getChildDockPanes().add(childDockPane);
+    getChildDockPanes().add(index, childDockPane);
+    tabPane.getSelectionModel().select(index);
   }
 
   @Override
@@ -46,7 +47,8 @@ public class TabPaneDockPane extends ParentDockPane {
   @Override
   public DockLayout setDockLayout() {
     DockLayout dockLayout = new DockLayout();
-    
+    dockLayout.setTitle(getTitle());
+    dockLayout.setType(TabPaneDockPane.class.getSimpleName());
     for (DockPane dockPane : getChildDockPanes()) {
       DockLayout childDockLayout = null;
       if (dockPane instanceof ParentDockPane) {

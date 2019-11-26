@@ -3,6 +3,8 @@ package dock;
 import java.util.ArrayList;
 import java.util.List;
 import dock.DockManager.DockPos;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
@@ -10,6 +12,7 @@ import javafx.scene.control.TabPane;
 
 public class SplitPaneDockPane extends ParentDockPane {
   public static final String DOCK_PARENT_SPLITPANE_PROPERTY = "DockParentSplitPane";
+  public static final String DOCK_SPLITPANE_DIVIDER_POSITIONS = "DockSplitPaneDividerPositions";
 
   public SplitPaneDockPane(DockPane dockPane) {
     super(dockPane);
@@ -74,10 +77,8 @@ public class SplitPaneDockPane extends ParentDockPane {
   @Override
   public void removeChildDockPane(DockPane childDockPane) {
     TabPane tabPane = childDockPane.getTab().getTabPane();
-    SplitPane splitPane =
-        (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
-    double[] dividerPositions =
-        removeDividerPosition(splitPane, splitPane.getItems().indexOf(tabPane));
+    SplitPane splitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+    double[] dividerPositions = removeDividerPosition(splitPane, splitPane.getItems().indexOf(tabPane));
     splitPane.getItems().remove(tabPane);
     if (dividerPositions != null) {
       splitPane.setDividerPositions(dividerPositions);
@@ -85,8 +86,7 @@ public class SplitPaneDockPane extends ParentDockPane {
     getChildDockPanes().remove(childDockPane);
 
     if (splitPane.getItems().size() == 1) {
-      SplitPane parentSplitPane =
-          (SplitPane) splitPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+      SplitPane parentSplitPane = (SplitPane) splitPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
       Node remainingItem = splitPane.getItems().remove(0);
       if (parentSplitPane != null) {
         int index = parentSplitPane.getItems().indexOf(splitPane);
@@ -95,8 +95,9 @@ public class SplitPaneDockPane extends ParentDockPane {
         parentSplitPane.setDividerPositions(dividerPositions);
         remainingItem.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, parentSplitPane);
       } else {
+        remainingItem.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
         if (remainingItem instanceof SplitPane) {
-          getTab().setContent(remainingItem);
+          setContent(remainingItem);
         } else {
           DockPane remainingDockPane = getChildDockPanes().remove(0);
           int index = getTab().getTabPane().getTabs().indexOf(getTab());
@@ -166,10 +167,41 @@ public class SplitPaneDockPane extends ParentDockPane {
     return newPositions;
   }
   
+  public static void setSplitPaneNeedsLayoutPropertyListener(SplitPane splitPane) {
+    splitPane.needsLayoutProperty().addListener(new ChangeListener<Boolean>() {
+      @Override
+      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+        if (!newValue) {
+          double[] dividerPositions = (double[])splitPane.getProperties().get(DOCK_SPLITPANE_DIVIDER_POSITIONS);
+          splitPane.setDividerPositions(dividerPositions);
+          splitPane.needsLayoutProperty().removeListener(this); 
+        }
+      }
+    });
+  }
+  
+  @Override
+  public void setStateProperties() {
+    super.setStateProperties();
+    SplitPane splitPane = (SplitPane)getContent();
+    setSplitPaneDividerProperty(splitPane);
+  }
+  
+  public void setSplitPaneDividerProperty(SplitPane splitPane) {
+    splitPane.getProperties().put(DOCK_SPLITPANE_DIVIDER_POSITIONS, splitPane.getDividerPositions());
+    setSplitPaneNeedsLayoutPropertyListener(splitPane);
+    for (Node node : splitPane.getItems()) {
+      if (node instanceof SplitPane) {
+        setSplitPaneDividerProperty((SplitPane)node);
+      }
+    }
+  }
+  
   @Override
   public DockLayout setDockLayout() {
     DockLayout dockLayout = new DockLayout();
-    dockLayout.setType("SplitPane");
+    dockLayout.setTitle(getTitle());
+    dockLayout.setType(SplitPaneDockPane.class.getSimpleName());
     SplitPane splitPane = ((SplitPane)getContent());
     dockLayout.setOrientation(splitPane.getOrientation());
     dockLayout.setDividerPositions(splitPane.getDividerPositions());
@@ -182,7 +214,7 @@ public class SplitPaneDockPane extends ParentDockPane {
       if (item instanceof SplitPane) {
         DockLayout dockLayout = new DockLayout();
         parentDockLayout.getChildren().add(dockLayout);
-        dockLayout.setType("SplitPane");
+        dockLayout.setType(SplitPane.class.getSimpleName());
         SplitPane splitPane = ((SplitPane)item);
         dockLayout.setOrientation(splitPane.getOrientation());
         dockLayout.setDividerPositions(splitPane.getDividerPositions());

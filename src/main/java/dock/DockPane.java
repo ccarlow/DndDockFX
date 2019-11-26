@@ -11,6 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
@@ -32,11 +33,11 @@ public class DockPane extends StackPane {
   private String title;
   private Node content;
   protected ParentDockPane parentDockPane;
-//  private DockLayout dockLayout;
   private DockGroup dockGroup;
   private Rectangle originalStage = new Rectangle();
   private DockPaneArea dockPaneArea = new DockPaneArea();
   private DockPaneTab dockPaneTab = new DockPaneTab();
+  private Menu menuItem;
 
   public static final String DOCK_HIDDEN_HEADER_TABPANE_STYLE_CLASS = "dock-hidden-header-tab-pane";
 
@@ -45,8 +46,6 @@ public class DockPane extends StackPane {
     dockPaneTab.setContent(this);
     getChildren().add(dockPaneArea);
     dockPaneArea.setVisible(false);
-
-
   }
 
   public void setContent(Node content) {
@@ -57,6 +56,14 @@ public class DockPane extends StackPane {
     }
     this.content = content;
   }
+  
+  protected void setMenuItem(Menu menuItem) {
+    this.menuItem = menuItem;
+  }
+  
+  protected Menu getMenuItem() {
+    return menuItem;
+  }
 
   public Node getContent() {
     return content;
@@ -65,14 +72,6 @@ public class DockPane extends StackPane {
   public ParentDockPane getParentDockPane() {
     return parentDockPane;
   }
-
-//  public DockLayout getDockLayout() {
-//    return dockLayout;
-//  }
-//  
-//  public void setDockLayout(DockLayout dockLayout) {
-//    this.dockLayout = dockLayout;
-//  }
 
   public DockPaneArea getDockArea() {
     return dockPaneArea;
@@ -101,6 +100,16 @@ public class DockPane extends StackPane {
 
   public DockPaneTab getTab() {
     return dockPaneTab;
+  }
+  
+  public void setStateProperties() {
+    if (getParentDockPane() == null) {
+      Stage stage = (Stage)getScene().getWindow();
+      originalStage.setX(stage.getX());
+      originalStage.setY(stage.getY());
+      originalStage.setWidth(stage.getWidth());
+      originalStage.setHeight(stage.getHeight());
+    }
   }
 
   public void toggleTabPaneHeaderVisibility() {
@@ -259,6 +268,9 @@ public class DockPane extends StackPane {
           if (contextMenu.isShowing()) {
             contextMenu.hide();
           }
+          
+          contextMenu.setDockPane(DockPane.this);
+          
           contextMenu.show(stackPane, event.getScreenX(), event.getScreenY());
           if (DockPane.this instanceof ParentDockPane) {
             contextMenu.hideRenameMenu(false);

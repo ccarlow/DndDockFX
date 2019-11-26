@@ -41,6 +41,14 @@ abstract class ParentDockPane extends DockPane {
   public ObservableList<DockPane> getChildDockPanes() {
     return childDockPanes;
   }
+  
+  @Override
+  public void setStateProperties() {
+    super.setStateProperties();
+    for (DockPane dockPane : childDockPanes) {
+      dockPane.setStateProperties();
+    }
+  }
 
   abstract public void addChildDockPane(DockPane childDockPane, DockPane targetDockPane,
       DockPos dockPos);
