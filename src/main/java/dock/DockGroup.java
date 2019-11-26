@@ -1,14 +1,20 @@
 package dock;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.stage.Stage;
 
-public class DockGroup extends Group {
+
+
+public class DockGroup extends Group implements DockType {
   private String groupName;
   private String groupId = "";
+  private List<DockType> groupMembers = new ArrayList<DockType>();
 
   public DockGroup() {
     getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
@@ -16,9 +22,12 @@ public class DockGroup extends Group {
       public void onChanged(Change<? extends Node> c) {
         if (c.next()) {
           for (Node node : c.getAddedSubList()) {
-            if (node instanceof DockPane) {
-              DockPane dockPane = (DockPane) node;
-              dockPane.setDockGroup(DockGroup.this);
+            if (node instanceof DockType) {
+              groupMembers.add((DockType)node);
+              if (node instanceof DockPane) {
+                DockPane dockPane = (DockPane) node;
+                dockPane.setDockGroup(DockGroup.this);
+              }
             }
           }
         }
@@ -51,11 +60,16 @@ public class DockGroup extends Group {
   }
 
   public void childrenToFront() {
-    for (Node child : getChildren()) {
+    for (DockType child : groupMembers) {
       if (child instanceof DockGroup) {
         ((DockGroup) child).childrenToFront();
       } else if (child instanceof DockPane) {
-        //TODO: child stage to front
+        DockPane rootDockPane = ((DockPane)child).getRootDockPane();
+        if (rootDockPane.getScene() != null && rootDockPane.getScene().getWindow() != null) {
+          ((Stage)rootDockPane.getScene().getWindow()).show();
+        } else {
+          DockManager.getInstance().newDockStage(rootDockPane);
+        }
       }
     }
   }

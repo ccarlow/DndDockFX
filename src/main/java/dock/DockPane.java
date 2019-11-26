@@ -29,7 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class DockPane extends StackPane {
+public class DockPane extends StackPane implements DockType {
   private String title;
   private Node content;
   protected ParentDockPane parentDockPane;
@@ -63,6 +63,13 @@ public class DockPane extends StackPane {
   
   protected Menu getMenuItem() {
     return menuItem;
+  }
+  
+  public DockPane getRootDockPane() {
+    if (parentDockPane != null) {
+      return parentDockPane.getRootDockPane();
+    } 
+    return this;
   }
 
   public Node getContent() {

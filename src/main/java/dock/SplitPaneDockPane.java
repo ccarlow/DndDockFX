@@ -240,28 +240,28 @@ public class SplitPaneDockPane extends ParentDockPane {
   public void mergeIntoParent() {
     if (getParentDockPane() != null) {
       TabPane tabPane = getTab().getTabPane();
-      SplitPane splitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
-      if (splitPane != null) {
-        int index = splitPane.getItems().indexOf(tabPane);
+      SplitPane parentSplitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+      if (parentSplitPane != null) {
+        int index = parentSplitPane.getItems().indexOf(tabPane);
         
         SplitPane childSplitPane = (SplitPane)getContent();
-        if (childSplitPane.getOrientation().equals(splitPane.getOrientation())) {
+        if (childSplitPane.getOrientation().equals(parentSplitPane.getOrientation())) {
           
-          double[] dividerPositions = mergeDividerPositions(splitPane, childSplitPane, index);
+          double[] dividerPositions = mergeDividerPositions(parentSplitPane, childSplitPane, index);
           
           List<Node> items = new ArrayList<Node>(childSplitPane.getItems());
           for (int i = items.size() - 1; i >= 0; i--) {
-            items.get(i).getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
-            splitPane.getItems().add(index, items.get(i));
+            items.get(i).getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, parentSplitPane);
+            parentSplitPane.getItems().add(index, items.get(i));
           }
-          splitPane.getItems().remove(tabPane);
+          parentSplitPane.getItems().remove(tabPane);
           
-          splitPane.setDividerPositions(dividerPositions);
+          parentSplitPane.setDividerPositions(dividerPositions);
         } else {
-          double[] dividerPositions = splitPane.getDividerPositions();
-          childSplitPane.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
-          splitPane.getItems().set(index, childSplitPane);
-          splitPane.setDividerPositions(dividerPositions);
+          double[] dividerPositions = parentSplitPane.getDividerPositions();
+          childSplitPane.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, parentSplitPane);
+          parentSplitPane.getItems().set(index, childSplitPane);
+          parentSplitPane.setDividerPositions(dividerPositions);
         }
         
         List<DockPane> childDockPanes = new ArrayList<DockPane>(getChildDockPanes());
