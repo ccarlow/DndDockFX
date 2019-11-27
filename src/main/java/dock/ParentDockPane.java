@@ -41,7 +41,7 @@ abstract class ParentDockPane extends DockPane {
   public ObservableList<DockPane> getChildDockPanes() {
     return childDockPanes;
   }
-  
+
   @Override
   public void setStateProperties() {
     super.setStateProperties();
@@ -56,6 +56,6 @@ abstract class ParentDockPane extends DockPane {
   abstract public void removeChildDockPane(DockPane childDockPane);
 
   abstract public DockLayout setDockLayout();
-  
+
   abstract public void mergeIntoParent();
 }

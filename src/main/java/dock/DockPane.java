@@ -29,7 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class DockPane extends StackPane implements DockType {
+public class DockPane extends StackPane {
   private String title;
   private Node content;
   protected ParentDockPane parentDockPane;
@@ -56,15 +56,15 @@ public class DockPane extends StackPane implements DockType {
     }
     this.content = content;
   }
-  
+
   protected void setMenuItem(Menu menuItem) {
     this.menuItem = menuItem;
   }
-  
+
   protected Menu getMenuItem() {
     return menuItem;
   }
-  
+
   public DockPane getRootDockPane() {
     if (parentDockPane != null) {
       return parentDockPane.getRootDockPane();
@@ -108,7 +108,7 @@ public class DockPane extends StackPane implements DockType {
   public DockPaneTab getTab() {
     return dockPaneTab;
   }
-  
+
   public void setStateProperties() {
     if (getParentDockPane() == null) {
       Stage stage = (Stage)getScene().getWindow();
@@ -275,9 +275,9 @@ public class DockPane extends StackPane implements DockType {
           if (contextMenu.isShowing()) {
             contextMenu.hide();
           }
-          
+
           contextMenu.setDockPane(DockPane.this);
-          
+
           contextMenu.show(stackPane, event.getScreenX(), event.getScreenY());
           if (DockPane.this instanceof ParentDockPane) {
             contextMenu.hideRenameMenu(false);

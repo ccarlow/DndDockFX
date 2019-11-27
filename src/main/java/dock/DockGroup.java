@@ -11,10 +11,11 @@ import javafx.stage.Stage;
 
 
 
-public class DockGroup extends Group implements DockType {
+public class DockGroup extends Group {
   private String groupName;
   private String groupId = "";
-  private List<DockType> groupMembers = new ArrayList<DockType>();
+  private List<DockPane> dockPanes = new ArrayList<DockPane>();
+  private List<DockGroup> dockGroups = new ArrayList<DockGroup>();
 
   public DockGroup() {
     getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
@@ -22,12 +23,12 @@ public class DockGroup extends Group implements DockType {
       public void onChanged(Change<? extends Node> c) {
         if (c.next()) {
           for (Node node : c.getAddedSubList()) {
-            if (node instanceof DockType) {
-              groupMembers.add((DockType)node);
-              if (node instanceof DockPane) {
-                DockPane dockPane = (DockPane) node;
-                dockPane.setDockGroup(DockGroup.this);
-              }
+            if (node instanceof DockGroup) {
+              dockGroups.add((DockGroup)node);
+            } else if (node instanceof DockPane) {
+              DockPane dockPane = (DockPane) node;
+              dockPane.setDockGroup(DockGroup.this);
+              dockPanes.add(dockPane);
             }
           }
         }
@@ -60,17 +61,18 @@ public class DockGroup extends Group implements DockType {
   }
 
   public void childrenToFront() {
-    for (DockType child : groupMembers) {
-      if (child instanceof DockGroup) {
-        ((DockGroup) child).childrenToFront();
-      } else if (child instanceof DockPane) {
-        DockPane rootDockPane = ((DockPane)child).getRootDockPane();
-        if (rootDockPane.getScene() != null && rootDockPane.getScene().getWindow() != null) {
-          ((Stage)rootDockPane.getScene().getWindow()).show();
-        } else {
-          DockManager.getInstance().newDockStage(rootDockPane);
-        }
+
+
+    for (DockPane child : dockPanes) {
+      DockPane rootDockPane = ((DockPane)child).getRootDockPane();
+      if (rootDockPane.getScene() != null && rootDockPane.getScene().getWindow() != null) {
+        ((Stage)rootDockPane.getScene().getWindow()).show();
+      } else {
+        DockManager.getInstance().newDockStage(rootDockPane);
       }
+    }
+    for (DockGroup child : dockGroups) {
+      ((DockGroup) child).childrenToFront();
     }
   }
 }

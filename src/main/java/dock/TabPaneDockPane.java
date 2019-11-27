@@ -43,7 +43,7 @@ public class TabPaneDockPane extends ParentDockPane {
       }
     }
   }
-  
+
   @Override
   public DockLayout setDockLayout() {
     DockLayout dockLayout = new DockLayout();
@@ -59,7 +59,7 @@ public class TabPaneDockPane extends ParentDockPane {
       childDockLayout.setId(dockPane.getId());
       dockLayout.getChildren().add(childDockLayout);
     }
-    
+
     return dockLayout;
   }
 

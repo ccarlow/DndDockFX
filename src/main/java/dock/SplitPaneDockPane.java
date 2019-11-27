@@ -34,9 +34,14 @@ public class SplitPaneDockPane extends ParentDockPane {
   public void addChildDockPane(DockPane childDockPane, DockPane targetDockPane, DockPos dockPos) {
     Orientation orientation = DockManager.getOrientation(dockPos);
     int index = DockManager.getDockPosIndex(dockPos);
-    TabPane tabPane = targetDockPane.getTab().getTabPane();
-    SplitPane splitPane = (SplitPane) tabPane.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
-    int tabPaneIndex = splitPane.getItems().indexOf(tabPane);
+    Node targetNode = targetDockPane.getTab().getTabPane();
+    SplitPane splitPane = (SplitPane) targetNode.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
+    int itemIndex = splitPane.getItems().indexOf(targetNode);
+    if (DockManager.isParentOrientation(dockPos)) {
+      targetNode = splitPane;
+      splitPane = (SplitPane)targetNode.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
+      itemIndex = splitPane.getItems().indexOf(targetNode);
+    }
     if (splitPane.getItems().size() == 1) {
       splitPane.setOrientation(orientation);
     } else {
@@ -49,7 +54,7 @@ public class SplitPaneDockPane extends ParentDockPane {
         // which causes previous divider positions to be lost
         double[] dividerPositions = parentSplitPane.getDividerPositions();
 
-        parentSplitPane.getItems().set(tabPaneIndex, splitPane);
+        parentSplitPane.getItems().set(itemIndex, splitPane);
 
         // Restore the original dividers positions after the SplitPane item has been set;
         // otherwise the difference between the old and new positions may be significant enough to
@@ -57,16 +62,16 @@ public class SplitPaneDockPane extends ParentDockPane {
         parentSplitPane.setDividerPositions(dividerPositions);
 
         splitPane.setOrientation(orientation);
-        tabPane.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
-        splitPane.getItems().add(tabPane);
+        targetNode.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
+        splitPane.getItems().add(targetNode);
       } else {
-        index += tabPaneIndex;
+        index += itemIndex;
       }
     }
 
-    double[] newDividerPositions = addDividerPositions(splitPane, tabPaneIndex);
+    double[] newDividerPositions = addDividerPositions(splitPane, itemIndex);
 
-    tabPane = new TabPane();
+    TabPane tabPane = new TabPane();
     tabPane.getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, splitPane);
     tabPane.getTabs().add(childDockPane.getTab());
     splitPane.getItems().add(index, tabPane);
@@ -139,7 +144,7 @@ public class SplitPaneDockPane extends ParentDockPane {
    */
   public double[] addDividerPositions(SplitPane splitPane, int index) {
     double[] positions = splitPane.getDividerPositions();
-      
+
     if (index > positions.length) {
       index = positions.length;
     }
@@ -166,7 +171,7 @@ public class SplitPaneDockPane extends ParentDockPane {
     }
     return newPositions;
   }
-  
+
   public static void setSplitPaneNeedsLayoutPropertyListener(SplitPane splitPane) {
     splitPane.needsLayoutProperty().addListener(new ChangeListener<Boolean>() {
       @Override
@@ -179,14 +184,14 @@ public class SplitPaneDockPane extends ParentDockPane {
       }
     });
   }
-  
+
   @Override
   public void setStateProperties() {
     super.setStateProperties();
     SplitPane splitPane = (SplitPane)getContent();
     setSplitPaneDividerProperty(splitPane);
   }
-  
+
   public void setSplitPaneDividerProperty(SplitPane splitPane) {
     splitPane.getProperties().put(DOCK_SPLITPANE_DIVIDER_POSITIONS, splitPane.getDividerPositions());
     setSplitPaneNeedsLayoutPropertyListener(splitPane);
@@ -196,7 +201,7 @@ public class SplitPaneDockPane extends ParentDockPane {
       }
     }
   }
-  
+
   @Override
   public DockLayout setDockLayout() {
     DockLayout dockLayout = new DockLayout();
@@ -208,7 +213,7 @@ public class SplitPaneDockPane extends ParentDockPane {
     setDockLayout(dockLayout, splitPane);
     return dockLayout;
   }
-  
+
   private void setDockLayout(DockLayout parentDockLayout, SplitPane parentSplitPane) {
     for (Node item : parentSplitPane.getItems()) {
       if (item instanceof SplitPane) {
@@ -243,19 +248,19 @@ public class SplitPaneDockPane extends ParentDockPane {
       SplitPane parentSplitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
       if (parentSplitPane != null) {
         int index = parentSplitPane.getItems().indexOf(tabPane);
-        
+
         SplitPane childSplitPane = (SplitPane)getContent();
         if (childSplitPane.getOrientation().equals(parentSplitPane.getOrientation())) {
-          
+
           double[] dividerPositions = mergeDividerPositions(parentSplitPane, childSplitPane, index);
-          
+
           List<Node> items = new ArrayList<Node>(childSplitPane.getItems());
           for (int i = items.size() - 1; i >= 0; i--) {
             items.get(i).getProperties().put(DOCK_PARENT_SPLITPANE_PROPERTY, parentSplitPane);
             parentSplitPane.getItems().add(index, items.get(i));
           }
           parentSplitPane.getItems().remove(tabPane);
-          
+
           parentSplitPane.setDividerPositions(dividerPositions);
         } else {
           double[] dividerPositions = parentSplitPane.getDividerPositions();
@@ -263,7 +268,7 @@ public class SplitPaneDockPane extends ParentDockPane {
           parentSplitPane.getItems().set(index, childSplitPane);
           parentSplitPane.setDividerPositions(dividerPositions);
         }
-        
+
         List<DockPane> childDockPanes = new ArrayList<DockPane>(getChildDockPanes());
         for (DockPane dockPane : childDockPanes) {
           getParentDockPane().getChildDockPanes().add(dockPane);
@@ -273,12 +278,12 @@ public class SplitPaneDockPane extends ParentDockPane {
       } 
     }
   }
-  
+
   public double[] mergeDividerPositions(SplitPane splitPane, SplitPane childSplitPane, int index) {
     double[] positions = splitPane.getDividerPositions();
     double[] childPositions = childSplitPane.getDividerPositions();
     double[] newPositions = new double[positions.length + childPositions.length];
-    
+
     double min = 0;
     double max = 1;
     if (index - 1 >= 0) {
@@ -287,12 +292,12 @@ public class SplitPaneDockPane extends ParentDockPane {
     if (index < positions.length) {
       max = positions[index];
     }
-    
+
     double width = max - min;
     for (int i = 0; i < childPositions.length; i++) {
       childPositions[i] = min + (childPositions[i] * width);
     }
-    
+
     int childIndex = -1;
     for (int i = 0; i < newPositions.length; i++) {
       if (i > index - 1) {

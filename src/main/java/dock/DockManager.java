@@ -46,11 +46,11 @@ public class DockManager {
 
   private static DockPaneTabContextMenu dockPaneTabContextMenu;
   private static DockPaneTabDragOverContextMenu dockPaneTabDragOverContextMenu;
-  
+
   public static final String SPLITPANE_DOCK_LAYOUT_TYPE = SplitPane.class.getSimpleName();
 
   public static enum DockPos {
-    SPLIT_TOP, SPLIT_BOTTOM, SPLIT_LEFT, SPLIT_RIGHT, TAB_BEFORE, TAB_AFTER;
+    SPLIT_TOP, SPLIT_BOTTOM, SPLIT_LEFT, SPLIT_RIGHT, TAB_BEFORE, TAB_AFTER, PARENT_SPLIT_TOP, PARENT_SPLIT_BOTTOM, PARENT_SPLIT_LEFT, PARENT_SPLIT_RIGHT;
   }
 
   private DockManager() {}
@@ -121,7 +121,7 @@ public class DockManager {
         }
         dockLayoutList.add(dockLayout);
         dockLayout.setId(dockPane.getId());
-        
+
         if (dockPane.getParentDockPane() == null) {
           Scene scene = dockPane.getScene();
           if (scene != null && scene.getWindow() != null) {
@@ -179,7 +179,7 @@ public class DockManager {
     for (DockPane dockPane : undockList) {
       // dockPane.undock();
     }
-    
+
     for (DockLayout dockLayout : dockLayoutList) {
       DockPane dockPane = null;
       if (!dockLayout.getChildren().isEmpty()) {
@@ -198,67 +198,72 @@ public class DockManager {
   }
 
   public DockPane loadDockLayoutChildren(DockLayout dockLayout) {
-    DockPane rootDockPane = null;
+    DockPane dockPane = null;
     if (!dockLayout.getChildren().isEmpty()) {
       DockPane previousChild = null;
       DockLayout previousChildLayout = null;
+      boolean merged = false;
       for (DockLayout childLayout : dockLayout.getChildren()) {
         DockPane child = loadDockLayoutChildren(childLayout);
         TabPane tabPane = new TabPane();
         tabPane.getTabs().add(child.getTab());
-        
+
         if (previousChild != null) {
-          targetDockPos = dockLayout.getOrientation() != null
-              ? Orientation.HORIZONTAL.equals(dockLayout.getOrientation()) ? DockPos.SPLIT_RIGHT : DockPos.SPLIT_BOTTOM
-                  : DockPos.TAB_AFTER;
+
+          if (dockLayout.getOrientation() != null) {
+            if (Orientation.HORIZONTAL.equals(dockLayout.getOrientation())) {
+              targetDockPos = merged ? DockPos.PARENT_SPLIT_RIGHT : DockPos.SPLIT_RIGHT;
+            } else {
+              targetDockPos = merged ? DockPos.PARENT_SPLIT_BOTTOM : DockPos.SPLIT_BOTTOM;
+            }
+          } else {
+            targetDockPos = DockPos.TAB_AFTER;
+          }
+
           setTargetDockPane(previousChild);
           child.dock();
-          
-          rootDockPane = child.getParentDockPane();
-          if (dockLayout.getType() != null && !SPLITPANE_DOCK_LAYOUT_TYPE.equals(dockLayout.getType())) {
+
+          if (!SPLITPANE_DOCK_LAYOUT_TYPE.equals(dockLayout.getType())) {
             child.getParentDockPane().setId(dockLayout.getId());
           }
-          
+
           if (SPLITPANE_DOCK_LAYOUT_TYPE.equals(childLayout.getType()) && child instanceof SplitPaneDockPane && child.getParentDockPane() != null) {
+            DockPane childChild = ((SplitPaneDockPane)child).getChildDockPanes().get(0);
             ((SplitPaneDockPane)child).mergeIntoParent();
-          } 
+            child = childChild;
+            merged = true;
+          } else {
+            merged = false;
+          }
 
           if (SPLITPANE_DOCK_LAYOUT_TYPE.equals(previousChildLayout.getType()) && previousChild instanceof SplitPaneDockPane && previousChild.getParentDockPane() != null) {
             ((SplitPaneDockPane)previousChild).mergeIntoParent();
-          }
-          
-          if (child.getParentDockPane() != null) {
-            rootDockPane = child.getParentDockPane();
-          } else if (previousChild.getParentDockPane() != null) {
-            rootDockPane = previousChild.getParentDockPane();
           }
         }
 
         previousChild = child;
         previousChildLayout = childLayout;
       }
-      
-      SplitPane splitPane = null;
-      if (rootDockPane == null) {
-        rootDockPane = getDockPaneById(dockLayout.getId());
-        splitPane = (SplitPane)rootDockPane.getContent();
-      } else {
-        DockPane child = ((ParentDockPane)rootDockPane).getChildDockPanes().get(0);
-        TabPane tabPane = child.getTab().getTabPane();
-        splitPane = (SplitPane)tabPane.getProperties().get(SplitPaneDockPane.DOCK_PARENT_SPLITPANE_PROPERTY);   
+
+      dockPane = previousChild.getParentDockPane();
+
+      if (!SPLITPANE_DOCK_LAYOUT_TYPE.equals(dockLayout.getType())) {
+        if (dockLayout.getTitle() != null) {
+          dockPane.getTab().getLabel().setText(dockLayout.getTitle());
+        } 
       }
-      if (dockLayout.getTitle() != null) {
-        rootDockPane.getTab().getLabel().setText(dockLayout.getTitle());
-      }
+
       if (dockLayout.getDividerPositions() != null) {
+        SplitPane splitPane = (SplitPane)dockPane.getContent();
         SplitPaneDockPane.setSplitPaneNeedsLayoutPropertyListener(splitPane);
         splitPane.getProperties().put(SplitPaneDockPane.DOCK_SPLITPANE_DIVIDER_POSITIONS, dockLayout.getDividerPositions());
       }
+
     } else {
-      rootDockPane = getDockPaneById(dockLayout.getId());
+      dockPane = getDockPaneById(dockLayout.getId());
     }
-    
-    return rootDockPane;
+
+    return dockPane;
   }
 
   public DockPane getDockPaneById(String id) {
@@ -286,22 +291,28 @@ public class DockManager {
   }
 
   public static int getDockPosIndex(DockPos dockPos) {
-    if (DockPos.SPLIT_RIGHT.equals(dockPos) || DockPos.SPLIT_BOTTOM.equals(dockPos)
-        || DockPos.TAB_AFTER.equals(dockPos)) {
+    if (DockPos.SPLIT_RIGHT.equals(dockPos) || DockPos.SPLIT_BOTTOM.equals(dockPos) ||
+        DockPos.PARENT_SPLIT_RIGHT.equals(dockPos) || DockPos.PARENT_SPLIT_BOTTOM.equals(dockPos) ||
+        DockPos.TAB_AFTER.equals(dockPos)) {
       return 1;
     }
     return 0;
   }
 
   public static Orientation getOrientation(DockPos dockPos) {
-    return dockPos == DockPos.SPLIT_LEFT || dockPos == DockPos.SPLIT_RIGHT ? Orientation.HORIZONTAL
-        : Orientation.VERTICAL;
+    return dockPos == DockPos.SPLIT_LEFT || dockPos == DockPos.SPLIT_RIGHT || dockPos == DockPos.PARENT_SPLIT_LEFT || dockPos == DockPos.PARENT_SPLIT_RIGHT 
+        ? Orientation.HORIZONTAL
+            : Orientation.VERTICAL;
+  }
+
+  public static boolean isParentOrientation(DockPos dockPos) {
+    return dockPos == DockPos.PARENT_SPLIT_LEFT || dockPos == DockPos.PARENT_SPLIT_RIGHT || dockPos == DockPos.PARENT_SPLIT_TOP || dockPos == DockPos.PARENT_SPLIT_BOTTOM;
   }
 
   public static Stage newDockStage(DockPane dockPane) {
     TabPane tabPane = new TabPane();
     tabPane.getTabs().add(dockPane.getTab());
-
+    dockPane.getProperties().put("test", "test");
     Stage stage = new Stage();
     stage.setTitle(dockPane.getTitle());
     stage.setScene(new Scene(tabPane));
@@ -370,7 +381,7 @@ public class DockManager {
         }
       });
       getItems().add(menuItem);
-      
+
       menuItem = new MenuItem("Merge into Parent Dock");
       menuItem.setOnAction(new EventHandler<ActionEvent>() {
         @Override
@@ -381,7 +392,7 @@ public class DockManager {
         }
       });
       getItems().add(menuItem);
-      
+
       getItems().add(dockPaneMenu);
     }
 
@@ -393,7 +404,7 @@ public class DockManager {
       if (!menuMap.isEmpty()) {
         return; 
       }
-      
+
       for (DockPane dockPane : dockPanes) {
         DockGroup dockGroup = dockPane.getDockGroup();
         setDockGroupMenu(dockGroup);
@@ -451,12 +462,10 @@ public class DockManager {
         }
       }
     }
-    
+
     public void setDockPane(DockPane dockPane) {
-      if (dockPane != null && dockPane.getMenuItem() != null) {
-        if (this.dockPane != null) {
-          this.dockPane.getMenuItem().getStyleClass().removeAll(DOCK_PANE_MENU_ITEM_STYLE_CLASS);
-        }
+      if (this.dockPane != null && this.dockPane.getMenuItem() != null) {
+        this.dockPane.getMenuItem().getStyleClass().removeAll(DOCK_PANE_MENU_ITEM_STYLE_CLASS);
       }
       if (dockPane != null && dockPane.getMenuItem() != null) {
         dockPane.getMenuItem().getStyleClass().add(DOCK_PANE_MENU_ITEM_STYLE_CLASS); 
@@ -473,6 +482,10 @@ public class DockManager {
     private static final String SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS = "split-right-dock-menu-item";
     private static final String SPLIT_TOP_MENU_ITEM_STYLE_CLASS = "split-top-dock-menu-item";
     private static final String SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS = "split-bottom-dock-menu-item";
+    private static final String PARENT_SPLIT_LEFT_MENU_ITEM_STYLE_CLASS = "parent-split-left-dock-menu-item";
+    private static final String PARENT_SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS = "parent-split-right-dock-menu-item";
+    private static final String PARENT_SPLIT_TOP_MENU_ITEM_STYLE_CLASS = "parent-split-top-dock-menu-item";
+    private static final String PARENT_SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS = "parent-split-bottom-dock-menu-item";
     private static final String TAB_BEFORE_MENU_ITEM_STYLE_CLASS = "tab-before-dock-menu-item";
     private static final String TAB_AFTER_MENU_ITEM_STYLE_CLASS = "tab-after-dock-menu-item";
     private boolean targetDragDropped = false;
@@ -550,6 +563,22 @@ public class DockManager {
       menuItem = new MenuItem("Tab After");
       menuItem.getStyleClass().add(TAB_AFTER_MENU_ITEM_STYLE_CLASS);
       getItems().add(menuItem);
+
+      menuItem = new MenuItem("Parent Split Left");
+      menuItem.getStyleClass().add(PARENT_SPLIT_LEFT_MENU_ITEM_STYLE_CLASS);
+      getItems().add(menuItem);
+
+      menuItem = new MenuItem("Parent Split Right");
+      menuItem.getStyleClass().add(PARENT_SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS);
+      getItems().add(menuItem);
+
+      menuItem = new MenuItem("Parent Split Top");
+      menuItem.getStyleClass().add(PARENT_SPLIT_TOP_MENU_ITEM_STYLE_CLASS);
+      getItems().add(menuItem);
+
+      menuItem = new MenuItem("Parent Split Bottom");
+      menuItem.getStyleClass().add(PARENT_SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS);
+      getItems().add(menuItem);
     }
 
     private void handleMenuItemDragEvent(Node node, boolean show) {
@@ -579,6 +608,14 @@ public class DockManager {
         return DockPos.SPLIT_TOP;
       } else if (node.getStyleClass().contains(SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS)) {
         return DockPos.SPLIT_BOTTOM;
+      } else if (node.getStyleClass().contains(PARENT_SPLIT_LEFT_MENU_ITEM_STYLE_CLASS)) {
+        return DockPos.PARENT_SPLIT_LEFT;
+      } else if (node.getStyleClass().contains(PARENT_SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS)) {
+        return DockPos.PARENT_SPLIT_RIGHT;
+      } else if (node.getStyleClass().contains(PARENT_SPLIT_TOP_MENU_ITEM_STYLE_CLASS)) {
+        return DockPos.PARENT_SPLIT_TOP;
+      } else if (node.getStyleClass().contains(PARENT_SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS)) {
+        return DockPos.PARENT_SPLIT_BOTTOM;
       } else if (node.getStyleClass().contains(TAB_BEFORE_MENU_ITEM_STYLE_CLASS)) {
         return DockPos.TAB_BEFORE;
       } else if (node.getStyleClass().contains(TAB_AFTER_MENU_ITEM_STYLE_CLASS)) {
