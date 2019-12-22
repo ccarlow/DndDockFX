@@ -1,4 +1,4 @@
-DndDockFX is yet another JavaFX docking library for JavaFX.
+DndDockFX is yet another JavaFX docking library.
 
 The motivation for this project emerged from the lack of power and flexibility of other JavaFX docking projects.
 
