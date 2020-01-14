@@ -47,6 +47,12 @@ public class DockPane extends StackPane {
     getChildren().add(dockPaneArea);
     dockPaneArea.setVisible(false);
   }
+  
+  public DockPane(String title, Node content) {
+	  this();
+	  setTitle(title);
+	  setContent(content);
+  }
 
   public void setContent(Node content) {
     if (this.content != null) {
@@ -147,6 +153,10 @@ public class DockPane extends StackPane {
       }
       parentDockPane.addChildDockPane(this, targetDockPane, targetDockPos);
     }
+  }
+  
+  public void show() {
+	  DockManager.getInstance().showDockPane(this);
   }
 
   public void undock() {

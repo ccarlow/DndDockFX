@@ -60,19 +60,13 @@ public class DockGroup extends Group {
     return groupName;
   }
 
-  public void childrenToFront() {
-
-
+  public void showChildren() {
     for (DockPane child : dockPanes) {
       DockPane rootDockPane = ((DockPane)child).getRootDockPane();
-      if (rootDockPane.getScene() != null && rootDockPane.getScene().getWindow() != null) {
-        ((Stage)rootDockPane.getScene().getWindow()).show();
-      } else {
-        DockManager.getInstance().newDockStage(rootDockPane);
-      }
+      rootDockPane.show();
     }
     for (DockGroup child : dockGroups) {
-      ((DockGroup) child).childrenToFront();
+      ((DockGroup) child).showChildren();
     }
   }
 }

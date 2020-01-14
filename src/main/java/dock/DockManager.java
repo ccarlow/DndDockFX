@@ -312,7 +312,6 @@ public class DockManager {
   public static Stage newDockStage(DockPane dockPane) {
     TabPane tabPane = new TabPane();
     tabPane.getTabs().add(dockPane.getTab());
-    dockPane.getProperties().put("test", "test");
     Stage stage = new Stage();
     stage.setTitle(dockPane.getTitle());
     stage.setScene(new Scene(tabPane));
@@ -334,6 +333,18 @@ public class DockManager {
       }
     });
     return stage;
+  }
+  
+  public void showDockPane(DockPane dockPane) {
+  	Window window = null;
+      if (dockPane.getScene() != null) {
+        window = dockPane.getScene().getWindow();
+      }
+      if (window != null) {
+        ((Stage)window).show();
+      } else {
+        newDockStage(dockPane.getRootDockPane());
+      }
   }
 
   class DockPaneTabContextMenu extends ContextMenu {
@@ -418,15 +429,7 @@ public class DockManager {
           menuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-              Window window = null;
-              if (dockPane.getScene() != null) {
-                window = dockPane.getScene().getWindow();
-              }
-              if (window != null) {
-                ((Stage)window).show();
-              } else {
-                newDockStage(dockPane.getRootDockPane());
-              }
+              showDockPane(dockPane);
             }
           });
           menuMap.put(key, menuItem);
@@ -442,7 +445,7 @@ public class DockManager {
         menuItem.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            dockGroup.childrenToFront();
+            dockGroup.showChildren();
           }
         });
         menuMap.put(dockGroup.getGroupId(), menuItem);

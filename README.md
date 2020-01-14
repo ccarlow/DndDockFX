@@ -36,7 +36,7 @@ The following is a list of the JavaFX docking libraries that were tested and the
 
 * DromblerFX (https://github.com/Drombler/drombler-fx)
   * Lacks drag and drop capabilities
-  * Differentiates beteween DockAreas and DockPanes.  DockAreas can only be represented as SplitPane items and cannot be reordered.  DockPanes can only exist within their designated DockArea and can only be represented as Tabs which cannot be reordered.
+  * Differentiates between DockAreas and DockPanes.  DockAreas can only be represented as SplitPane items and cannot be reordered.  DockPanes can only exist within their designated DockArea and can only be represented as Tabs which cannot be reordered.
 
 * FXDock (https://github.com/andy-goryachev/FxDock, +1 for DragEvents over MouseEvents)
   * Bloated codebase (350+ source files) much of which seems irrelevant to docking.
