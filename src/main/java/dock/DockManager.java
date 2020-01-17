@@ -37,15 +37,13 @@ import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
 public class DockManager {
-  private static DockManager instance;
-  private static DockPane sourceDockPane;
-  private static DockPane targetDockPane;
-  private static DockPos targetDockPos;
-  private static List<DockPane> dockPanes;
+  private DockPane sourceDockPane;
+  private DockPane targetDockPane;
+  private DockPos targetDockPos;
+  private List<DockPane> dockPanes;
   private String layoutConfigFile;
-
-  private static DockPaneTabContextMenu dockPaneTabContextMenu;
-  private static DockPaneTabDragOverContextMenu dockPaneTabDragOverContextMenu;
+  private DockPaneTabContextMenu dockPaneTabContextMenu;
+  private DockPaneTabDragOverContextMenu dockPaneTabDragOverContextMenu;
 
   public static final String SPLITPANE_DOCK_LAYOUT_TYPE = SplitPane.class.getSimpleName();
 
@@ -53,10 +51,19 @@ public class DockManager {
     SPLIT_TOP, SPLIT_BOTTOM, SPLIT_LEFT, SPLIT_RIGHT, TAB_BEFORE, TAB_AFTER, PARENT_SPLIT_TOP, PARENT_SPLIT_BOTTOM, PARENT_SPLIT_LEFT, PARENT_SPLIT_RIGHT;
   }
 
-  private DockManager() {}
+  public DockManager() {
+    dockPanes = new ArrayList<DockPane>();
+    dockPaneTabContextMenu = new DockPaneTabContextMenu();
+    dockPaneTabDragOverContextMenu = new DockPaneTabDragOverContextMenu();
+  }
 
   public void addDockPane(DockPane dockPane) {
+    dockPane.setDockManager(this);
+    dockPaneTabContextMenu.setMenu(dockPane);
     dockPanes.add(dockPane);
+    for (DockPane groupDockPane : dockPane.getDockPanes()) {
+    	addDockPane(groupDockPane);
+    }
   }
 
   public void setLayoutConfigFile(String layoutConfigFile) {
@@ -65,16 +72,6 @@ public class DockManager {
 
   public String getLayoutConfigFile() {
     return layoutConfigFile;
-  }
-
-  public static DockManager getInstance() {
-    if (instance == null) {
-      instance = new DockManager();
-      dockPanes = new ArrayList<DockPane>();
-      dockPaneTabContextMenu = instance.new DockPaneTabContextMenu();
-      dockPaneTabDragOverContextMenu = instance.new DockPaneTabDragOverContextMenu();
-    }
-    return instance;
   }
 
   public void setSourceDockPane(DockPane dockPane) {
@@ -151,7 +148,6 @@ public class DockManager {
   }
 
   public void loadDockLayout() {
-    dockPaneTabContextMenu.setMenus();
     try (XMLDecoder decoder =
         new XMLDecoder(new BufferedInputStream(new FileInputStream(layoutConfigFile)),
             Thread.currentThread().getContextClassLoader())) {
@@ -186,6 +182,9 @@ public class DockManager {
         loadDockLayoutChildren(dockLayout);
       }
       dockPane = getDockPaneById(dockLayout.getId());
+      if (dockPane == null) {
+        System.out.println("dockpane not found");
+      }
       dockPane.getOriginalStage().setX(dockLayout.getX());
       dockPane.getOriginalStage().setY(dockLayout.getY());
       dockPane.getOriginalStage().setWidth(dockLayout.getWidth());
@@ -227,17 +226,20 @@ public class DockManager {
             child.getParentDockPane().setId(dockLayout.getId());
           }
 
-          if (SPLITPANE_DOCK_LAYOUT_TYPE.equals(childLayout.getType()) && child instanceof SplitPaneDockPane && child.getParentDockPane() != null) {
-            DockPane childChild = ((SplitPaneDockPane)child).getChildDockPanes().get(0);
-            ((SplitPaneDockPane)child).mergeIntoParent();
+          if (SPLITPANE_DOCK_LAYOUT_TYPE.equals(childLayout.getType())
+              && child instanceof SplitPaneDockPane && child.getParentDockPane() != null) {
+            DockPane childChild = ((SplitPaneDockPane) child).getChildDockPanes().get(0);
+            ((SplitPaneDockPane) child).mergeIntoParent();
             child = childChild;
             merged = true;
           } else {
             merged = false;
           }
 
-          if (SPLITPANE_DOCK_LAYOUT_TYPE.equals(previousChildLayout.getType()) && previousChild instanceof SplitPaneDockPane && previousChild.getParentDockPane() != null) {
-            ((SplitPaneDockPane)previousChild).mergeIntoParent();
+          if (SPLITPANE_DOCK_LAYOUT_TYPE.equals(previousChildLayout.getType())
+              && previousChild instanceof SplitPaneDockPane
+              && previousChild.getParentDockPane() != null) {
+            ((SplitPaneDockPane) previousChild).mergeIntoParent();
           }
         }
 
@@ -250,13 +252,14 @@ public class DockManager {
       if (!SPLITPANE_DOCK_LAYOUT_TYPE.equals(dockLayout.getType())) {
         if (dockLayout.getTitle() != null) {
           dockPane.getTab().getLabel().setText(dockLayout.getTitle());
-        } 
+        }
       }
 
       if (dockLayout.getDividerPositions() != null) {
-        SplitPane splitPane = (SplitPane)dockPane.getContent();
+        SplitPane splitPane = (SplitPane) dockPane.getContent();
         SplitPaneDockPane.setSplitPaneNeedsLayoutPropertyListener(splitPane);
-        splitPane.getProperties().put(SplitPaneDockPane.DOCK_SPLITPANE_DIVIDER_POSITIONS, dockLayout.getDividerPositions());
+        splitPane.getProperties().put(SplitPaneDockPane.DOCK_SPLITPANE_DIVIDER_POSITIONS,
+            dockLayout.getDividerPositions());
       }
 
     } else {
@@ -291,22 +294,24 @@ public class DockManager {
   }
 
   public static int getDockPosIndex(DockPos dockPos) {
-    if (DockPos.SPLIT_RIGHT.equals(dockPos) || DockPos.SPLIT_BOTTOM.equals(dockPos) ||
-        DockPos.PARENT_SPLIT_RIGHT.equals(dockPos) || DockPos.PARENT_SPLIT_BOTTOM.equals(dockPos) ||
-        DockPos.TAB_AFTER.equals(dockPos)) {
+    if (DockPos.SPLIT_RIGHT.equals(dockPos) || DockPos.SPLIT_BOTTOM.equals(dockPos)
+        || DockPos.PARENT_SPLIT_RIGHT.equals(dockPos) || DockPos.PARENT_SPLIT_BOTTOM.equals(dockPos)
+        || DockPos.TAB_AFTER.equals(dockPos)) {
       return 1;
     }
     return 0;
   }
 
   public static Orientation getOrientation(DockPos dockPos) {
-    return dockPos == DockPos.SPLIT_LEFT || dockPos == DockPos.SPLIT_RIGHT || dockPos == DockPos.PARENT_SPLIT_LEFT || dockPos == DockPos.PARENT_SPLIT_RIGHT 
-        ? Orientation.HORIZONTAL
+    return dockPos == DockPos.SPLIT_LEFT || dockPos == DockPos.SPLIT_RIGHT
+        || dockPos == DockPos.PARENT_SPLIT_LEFT || dockPos == DockPos.PARENT_SPLIT_RIGHT
+            ? Orientation.HORIZONTAL
             : Orientation.VERTICAL;
   }
 
   public static boolean isParentOrientation(DockPos dockPos) {
-    return dockPos == DockPos.PARENT_SPLIT_LEFT || dockPos == DockPos.PARENT_SPLIT_RIGHT || dockPos == DockPos.PARENT_SPLIT_TOP || dockPos == DockPos.PARENT_SPLIT_BOTTOM;
+    return dockPos == DockPos.PARENT_SPLIT_LEFT || dockPos == DockPos.PARENT_SPLIT_RIGHT
+        || dockPos == DockPos.PARENT_SPLIT_TOP || dockPos == DockPos.PARENT_SPLIT_BOTTOM;
   }
 
   public static Stage newDockStage(DockPane dockPane) {
@@ -323,28 +328,30 @@ public class DockManager {
     stage.setWidth(dockPane.getOriginalStage().getWidth());
     stage.setHeight(dockPane.getOriginalStage().getHeight());
 
-    stage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>() {
-      @Override
-      public void handle(WindowEvent event) {
-        Stage stage = ((Stage) event.getSource());
-        TabPane tabPane = (TabPane) stage.getScene().getRoot();
-        DockPaneTab tab = (DockPaneTab) tabPane.getTabs().get(0);
-        tab.getDockPane().setStateProperties();
-      }
-    });
+    stage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,
+        new EventHandler<WindowEvent>() {
+          @Override
+          public void handle(WindowEvent event) {
+            Stage stage = ((Stage) event.getSource());
+            TabPane tabPane = (TabPane) stage.getScene().getRoot();
+            DockPaneTab tab = (DockPaneTab) tabPane.getTabs().get(0);
+            tab.getDockPane().setStateProperties();
+          }
+        });
     return stage;
   }
-  
+
   public void showDockPane(DockPane dockPane) {
-  	Window window = null;
-      if (dockPane.getScene() != null) {
-        window = dockPane.getScene().getWindow();
-      }
-      if (window != null) {
-        ((Stage)window).show();
-      } else {
-        newDockStage(dockPane.getRootDockPane());
-      }
+    Window window = null;
+    if (dockPane.getScene() != null) {
+      window = dockPane.getScene().getWindow();
+    }
+    if (window != null) {
+      ((Stage) window).show();
+      ((Stage) window).toFront();
+    } else {
+      newDockStage(dockPane.getRootDockPane());
+    }
   }
 
   class DockPaneTabContextMenu extends ContextMenu {
@@ -368,7 +375,7 @@ public class DockManager {
       menuItem.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-          DockManager.getInstance().saveDockLayout();
+          saveDockLayout();
         }
       });
       getItems().add(menuItem);
@@ -397,8 +404,9 @@ public class DockManager {
       menuItem.setOnAction(new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-          if (sourceDockPane.getParentDockPane() != null && sourceDockPane instanceof ParentDockPane) {
-            ((ParentDockPane)sourceDockPane).mergeIntoParent();
+          if (sourceDockPane.getParentDockPane() != null
+              && sourceDockPane instanceof ParentDockPane) {
+            ((ParentDockPane) sourceDockPane).mergeIntoParent();
           }
         }
       });
@@ -411,58 +419,28 @@ public class DockManager {
       renameMenuItem.setVisible(!hide);
     }
 
-    public void setMenus() {
-      if (!menuMap.isEmpty()) {
-        return; 
+    public void setMenu(DockPane dockPane) {
+      if (dockPane.getGroupDockPane() != null) {
+        setMenu(dockPane.getGroupDockPane());
       }
-
-      for (DockPane dockPane : dockPanes) {
-        DockGroup dockGroup = dockPane.getDockGroup();
-        setDockGroupMenu(dockGroup);
-
-        String key = dockGroup.getGroupId() + dockPane.getId();
-        Menu menuItem = (Menu) menuMap.get(key);
-        if (menuItem == null) {
-          menuItem = new Menu(dockPane.getTitle());
-          dockPane.setMenuItem(menuItem);
-          menuItem.getStyleClass().remove("menu");
-          menuItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-              showDockPane(dockPane);
-            }
-          });
-          menuMap.put(key, menuItem);
-        }
-        ((Menu) menuMap.get(dockGroup.getGroupId())).getItems().add(menuItem);
-      }
-    }
-
-    private void setDockGroupMenu(DockGroup dockGroup) {
-      Menu menuItem = (Menu) menuMap.get(dockGroup.getGroupId());
+      Menu menuItem = (Menu) menuMap.get(dockPane.getGroupId());
       if (menuItem == null) {
-        menuItem = new Menu(dockGroup.getGroupName());
+        menuItem = new Menu(dockPane.getTitle());
+        dockPane.setMenuItem(menuItem);
+        menuItem.getStyleClass().remove("menu");
         menuItem.setOnAction(new EventHandler<ActionEvent>() {
           @Override
           public void handle(ActionEvent event) {
-            dockGroup.showChildren();
+            showDockPane(dockPane);
           }
         });
-        menuMap.put(dockGroup.getGroupId(), menuItem);
-      }
-
-      if (dockGroup.getParent() != null && dockGroup.getParent() instanceof DockGroup) {
-        DockGroup parent = (DockGroup) dockGroup.getParent();
-        setDockGroupMenu(parent);
-        Menu parentMenu = ((Menu) menuMap.get(parent.getGroupId()));
-        if (!parentMenu.getItems().contains(menuItem)) {
-          parentMenu.getItems().add(menuItem);
-        }
-      } else {
-        Menu menu = (Menu) menuMap.get(dockGroup.getGroupId());
-        if (!dockPaneMenu.getItems().contains(menu)) {
-          dockPaneMenu.getItems().add(menu);
-        }
+        menuMap.put(dockPane.getGroupId(), menuItem);
+        if (dockPane.getGroupDockPane() != null) {
+            Menu parentMenu = (Menu) menuMap.get(dockPane.getGroupDockPane().getGroupId());
+            parentMenu.getItems().add(menuItem);
+          } else {
+        	  dockPaneMenu.getItems().add(menuItem);
+          }
       }
     }
 
@@ -471,13 +449,14 @@ public class DockManager {
         this.dockPane.getMenuItem().getStyleClass().removeAll(DOCK_PANE_MENU_ITEM_STYLE_CLASS);
       }
       if (dockPane != null && dockPane.getMenuItem() != null) {
-        dockPane.getMenuItem().getStyleClass().add(DOCK_PANE_MENU_ITEM_STYLE_CLASS); 
+        dockPane.getMenuItem().getStyleClass().add(DOCK_PANE_MENU_ITEM_STYLE_CLASS);
       }
       this.dockPane = dockPane;
     }
   }
 
-  // This ContextMenu exists in the DockFX singleton to guarantee only one ContextMenu is shown at any time
+  // This ContextMenu exists in the DockFX singleton to guarantee only one ContextMenu is shown at
+  // any time
   // Otherwise ContextMenu hide events are missed in some scenarios causing multiple DragOver
   // ContextMenus to be shown which degrades user experience
   class DockPaneTabDragOverContextMenu extends ContextMenu {
@@ -485,10 +464,14 @@ public class DockManager {
     private static final String SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS = "split-right-dock-menu-item";
     private static final String SPLIT_TOP_MENU_ITEM_STYLE_CLASS = "split-top-dock-menu-item";
     private static final String SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS = "split-bottom-dock-menu-item";
-    private static final String PARENT_SPLIT_LEFT_MENU_ITEM_STYLE_CLASS = "parent-split-left-dock-menu-item";
-    private static final String PARENT_SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS = "parent-split-right-dock-menu-item";
-    private static final String PARENT_SPLIT_TOP_MENU_ITEM_STYLE_CLASS = "parent-split-top-dock-menu-item";
-    private static final String PARENT_SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS = "parent-split-bottom-dock-menu-item";
+    private static final String PARENT_SPLIT_LEFT_MENU_ITEM_STYLE_CLASS =
+        "parent-split-left-dock-menu-item";
+    private static final String PARENT_SPLIT_RIGHT_MENU_ITEM_STYLE_CLASS =
+        "parent-split-right-dock-menu-item";
+    private static final String PARENT_SPLIT_TOP_MENU_ITEM_STYLE_CLASS =
+        "parent-split-top-dock-menu-item";
+    private static final String PARENT_SPLIT_BOTTOM_MENU_ITEM_STYLE_CLASS =
+        "parent-split-bottom-dock-menu-item";
     private static final String TAB_BEFORE_MENU_ITEM_STYLE_CLASS = "tab-before-dock-menu-item";
     private static final String TAB_AFTER_MENU_ITEM_STYLE_CLASS = "tab-after-dock-menu-item";
     private boolean targetDragDropped = false;
@@ -519,7 +502,7 @@ public class DockManager {
           if (event.getTarget() instanceof Node) {
             Node node = ((Node) event.getTarget());
             if (node.getStyleClass().contains("menu-item")) {
-              DockManager.getInstance().setTargetDockPos(getMenuItemDockPos(node));
+              setTargetDockPos(getMenuItemDockPos(node));
               targetDragDropped = true;
             }
           }

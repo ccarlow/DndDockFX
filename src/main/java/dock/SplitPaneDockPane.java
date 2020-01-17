@@ -35,11 +35,12 @@ public class SplitPaneDockPane extends ParentDockPane {
     Orientation orientation = DockManager.getOrientation(dockPos);
     int index = DockManager.getDockPosIndex(dockPos);
     Node targetNode = targetDockPane.getTab().getTabPane();
-    SplitPane splitPane = (SplitPane) targetNode.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
+    SplitPane splitPane =
+        (SplitPane) targetNode.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
     int itemIndex = splitPane.getItems().indexOf(targetNode);
     if (DockManager.isParentOrientation(dockPos)) {
       targetNode = splitPane;
-      splitPane = (SplitPane)targetNode.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
+      splitPane = (SplitPane) targetNode.getProperties().get(DOCK_PARENT_SPLITPANE_PROPERTY);
       itemIndex = splitPane.getItems().indexOf(targetNode);
     }
     if (splitPane.getItems().size() == 1) {
@@ -82,8 +83,10 @@ public class SplitPaneDockPane extends ParentDockPane {
   @Override
   public void removeChildDockPane(DockPane childDockPane) {
     TabPane tabPane = childDockPane.getTab().getTabPane();
-    SplitPane splitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
-    double[] dividerPositions = removeDividerPosition(splitPane, splitPane.getItems().indexOf(tabPane));
+    SplitPane splitPane =
+        (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+    double[] dividerPositions =
+        removeDividerPosition(splitPane, splitPane.getItems().indexOf(tabPane));
     splitPane.getItems().remove(tabPane);
     if (dividerPositions != null) {
       splitPane.setDividerPositions(dividerPositions);
@@ -91,7 +94,8 @@ public class SplitPaneDockPane extends ParentDockPane {
     getChildDockPanes().remove(childDockPane);
 
     if (splitPane.getItems().size() == 1) {
-      SplitPane parentSplitPane = (SplitPane) splitPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+      SplitPane parentSplitPane =
+          (SplitPane) splitPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
       Node remainingItem = splitPane.getItems().remove(0);
       if (parentSplitPane != null) {
         int index = parentSplitPane.getItems().indexOf(splitPane);
@@ -175,11 +179,13 @@ public class SplitPaneDockPane extends ParentDockPane {
   public static void setSplitPaneNeedsLayoutPropertyListener(SplitPane splitPane) {
     splitPane.needsLayoutProperty().addListener(new ChangeListener<Boolean>() {
       @Override
-      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+      public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+          Boolean newValue) {
         if (!newValue) {
-          double[] dividerPositions = (double[])splitPane.getProperties().get(DOCK_SPLITPANE_DIVIDER_POSITIONS);
+          double[] dividerPositions =
+              (double[]) splitPane.getProperties().get(DOCK_SPLITPANE_DIVIDER_POSITIONS);
           splitPane.setDividerPositions(dividerPositions);
-          splitPane.needsLayoutProperty().removeListener(this); 
+          splitPane.needsLayoutProperty().removeListener(this);
         }
       }
     });
@@ -188,16 +194,17 @@ public class SplitPaneDockPane extends ParentDockPane {
   @Override
   public void setStateProperties() {
     super.setStateProperties();
-    SplitPane splitPane = (SplitPane)getContent();
+    SplitPane splitPane = (SplitPane) getContent();
     setSplitPaneDividerProperty(splitPane);
   }
 
   public void setSplitPaneDividerProperty(SplitPane splitPane) {
-    splitPane.getProperties().put(DOCK_SPLITPANE_DIVIDER_POSITIONS, splitPane.getDividerPositions());
+    splitPane.getProperties().put(DOCK_SPLITPANE_DIVIDER_POSITIONS,
+        splitPane.getDividerPositions());
     setSplitPaneNeedsLayoutPropertyListener(splitPane);
     for (Node node : splitPane.getItems()) {
       if (node instanceof SplitPane) {
-        setSplitPaneDividerProperty((SplitPane)node);
+        setSplitPaneDividerProperty((SplitPane) node);
       }
     }
   }
@@ -207,7 +214,7 @@ public class SplitPaneDockPane extends ParentDockPane {
     DockLayout dockLayout = new DockLayout();
     dockLayout.setTitle(getTitle());
     dockLayout.setType(SplitPaneDockPane.class.getSimpleName());
-    SplitPane splitPane = ((SplitPane)getContent());
+    SplitPane splitPane = ((SplitPane) getContent());
     dockLayout.setOrientation(splitPane.getOrientation());
     dockLayout.setDividerPositions(splitPane.getDividerPositions());
     setDockLayout(dockLayout, splitPane);
@@ -220,15 +227,15 @@ public class SplitPaneDockPane extends ParentDockPane {
         DockLayout dockLayout = new DockLayout();
         parentDockLayout.getChildren().add(dockLayout);
         dockLayout.setType(SplitPane.class.getSimpleName());
-        SplitPane splitPane = ((SplitPane)item);
+        SplitPane splitPane = ((SplitPane) item);
         dockLayout.setOrientation(splitPane.getOrientation());
         dockLayout.setDividerPositions(splitPane.getDividerPositions());
         setDockLayout(dockLayout, splitPane);
       } else if (item instanceof TabPane) {
-        DockPane dockPane = ((DockPaneTab)((TabPane)item).getTabs().get(0)).getDockPane();
+        DockPane dockPane = ((DockPaneTab) ((TabPane) item).getTabs().get(0)).getDockPane();
         DockLayout dockLayout = null;
         if (dockPane instanceof ParentDockPane) {
-          dockLayout = ((ParentDockPane)dockPane).setDockLayout();
+          dockLayout = ((ParentDockPane) dockPane).setDockLayout();
         } else {
           dockLayout = new DockLayout();
         }
@@ -245,11 +252,12 @@ public class SplitPaneDockPane extends ParentDockPane {
   public void mergeIntoParent() {
     if (getParentDockPane() != null) {
       TabPane tabPane = getTab().getTabPane();
-      SplitPane parentSplitPane = (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
+      SplitPane parentSplitPane =
+          (SplitPane) tabPane.getProperties().remove(DOCK_PARENT_SPLITPANE_PROPERTY);
       if (parentSplitPane != null) {
         int index = parentSplitPane.getItems().indexOf(tabPane);
 
-        SplitPane childSplitPane = (SplitPane)getContent();
+        SplitPane childSplitPane = (SplitPane) getContent();
         if (childSplitPane.getOrientation().equals(parentSplitPane.getOrientation())) {
 
           double[] dividerPositions = mergeDividerPositions(parentSplitPane, childSplitPane, index);
@@ -273,9 +281,9 @@ public class SplitPaneDockPane extends ParentDockPane {
         for (DockPane dockPane : childDockPanes) {
           getParentDockPane().getChildDockPanes().add(dockPane);
         }
-        DockManager.getInstance().removeDockPaneById(getId());
+        dockManager.removeDockPaneById(getId());
         getParentDockPane().getChildDockPanes().remove(this);
-      } 
+      }
     }
   }
 
@@ -287,8 +295,8 @@ public class SplitPaneDockPane extends ParentDockPane {
     double min = 0;
     double max = 1;
     if (index - 1 >= 0) {
-      min = positions[index - 1]; 
-    } 
+      min = positions[index - 1];
+    }
     if (index < positions.length) {
       max = positions[index];
     }

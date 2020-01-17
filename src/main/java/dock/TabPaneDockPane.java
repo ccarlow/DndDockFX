@@ -52,7 +52,7 @@ public class TabPaneDockPane extends ParentDockPane {
     for (DockPane dockPane : getChildDockPanes()) {
       DockLayout childDockLayout = null;
       if (dockPane instanceof ParentDockPane) {
-        childDockLayout = ((ParentDockPane)dockPane).setDockLayout();
+        childDockLayout = ((ParentDockPane) dockPane).setDockLayout();
       } else {
         childDockLayout = new DockLayout();
       }
@@ -64,6 +64,5 @@ public class TabPaneDockPane extends ParentDockPane {
   }
 
   @Override
-  public void mergeIntoParent() {
-  }
+  public void mergeIntoParent() {}
 }

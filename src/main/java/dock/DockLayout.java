@@ -19,7 +19,7 @@ public class DockLayout {
   private List<DockLayout> children = new ArrayList<DockLayout>();
 
   public DockLayout() {
-    
+
   }
 
   public List<DockLayout> getChildren() {
@@ -61,51 +61,51 @@ public class DockLayout {
   public boolean getIsClosed() {
     return isClosed;
   }
-  
+
   public void setX(double x) {
     this.x = x;
   }
-  
+
   public double getX() {
     return x;
   }
-  
+
   public void setY(double y) {
     this.y = y;
   }
-  
+
   public double getY() {
     return y;
   }
-  
+
   public void setWidth(double width) {
     this.width = width;
   }
-  
+
   public double getWidth() {
     return width;
   }
-  
+
   public void setHeight(double height) {
     this.height = height;
   }
-  
+
   public double getHeight() {
     return height;
   }
-  
+
   public void setOrientation(Orientation orientation) {
     this.orientation = orientation;
   }
-  
+
   public Orientation getOrientation() {
     return orientation;
   }
-  
+
   public void setDividerPositions(double[] dividerPositions) {
     this.dividerPositions = dividerPositions;
   }
-  
+
   public double[] getDividerPositions() {
     return dividerPositions;
   }
