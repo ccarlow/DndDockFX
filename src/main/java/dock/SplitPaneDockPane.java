@@ -18,7 +18,6 @@ public class SplitPaneDockPane extends ParentDockPane {
     super(dockPane);
 
     TabPane tabPane = dockPane.getTab().getTabPane();
-    // tabPane.getStyleClass().add(DOCK_HIDDEN_HEADER_TABPANE_STYLE_CLASS);
     int tabIndex = tabPane.getTabs().indexOf(dockPane.getTab());
     tabPane.getTabs().set(tabIndex, getTab());
     SplitPane splitPane = new SplitPane();

@@ -52,25 +52,25 @@ public class DockPane extends StackPane {
     dockPaneTab.setContent(this);
     getChildren().add(dockPaneArea);
     dockPaneArea.setVisible(false);
-    
+
     dockPanes.addListener(new ListChangeListener<DockPane>() {
-        @Override
-        public void onChanged(Change<? extends DockPane> c) {
-          if (c.next()) {
-            for (DockPane node : c.getAddedSubList()) {
-              node.setGroupDockPane(DockPane.this);
-            }
+      @Override
+      public void onChanged(Change<? extends DockPane> c) {
+        if (c.next()) {
+          for (DockPane node : c.getAddedSubList()) {
+            node.setGroupDockPane(DockPane.this);
           }
         }
-      });
+      }
+    });
   }
 
   public void setDockManager(DockManager dockManager) {
     this.dockManager = dockManager;
   }
-  
+
   public DockManager getDockManager() {
-	  return dockManager;
+    return dockManager;
   }
 
   public DockPane(String title, Node content) {
@@ -174,10 +174,12 @@ public class DockPane extends StackPane {
       if (DockManager.isSplitDockPos(targetDockPos)) {
         if (!(parentDockPane instanceof SplitPaneDockPane)) {
           parentDockPane = new SplitPaneDockPane(targetDockPane);
+          dockManager.addDockPane(parentDockPane);
         }
       } else {
         if (!(parentDockPane instanceof TabPaneDockPane)) {
           parentDockPane = new TabPaneDockPane(targetDockPane);
+          dockManager.addDockPane(parentDockPane);
         }
       }
       parentDockPane.addChildDockPane(this, targetDockPane, targetDockPos);
@@ -191,13 +193,13 @@ public class DockPane extends StackPane {
     }
   }
 
-  public String getGroupId() {
-    String groupId = "";
+  public String getDockId() {
+    String dockId = "";
     if (groupDockPane != null) {
-      groupId += groupDockPane.getGroupId();
+      dockId += groupDockPane.getDockId();
     }
-    groupId += getId();
-    return groupId;
+    dockId += getId();
+    return dockId;
   }
 
   public void undock() {
@@ -341,7 +343,6 @@ public class DockPane extends StackPane {
       stackPane.setOnDragDetected(new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
-          System.out.println("drag");
           Node node = (Node) event.getSource();
 
           Stage stage = (Stage) node.getScene().getWindow();
@@ -376,7 +377,6 @@ public class DockPane extends StackPane {
       stackPane.setOnDragDone(new EventHandler<DragEvent>() {
         @Override
         public void handle(DragEvent event) {
-          System.out.println("drag done");
           Point point = MouseInfo.getPointerInfo().getLocation();
           double xPos = point.getX() - originalStage.getX();
           double yPos = point.getY() - originalStage.getY();

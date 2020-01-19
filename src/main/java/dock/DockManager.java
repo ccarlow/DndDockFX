@@ -62,7 +62,7 @@ public class DockManager {
     dockPaneTabContextMenu.setMenu(dockPane);
     dockPanes.add(dockPane);
     for (DockPane groupDockPane : dockPane.getDockPanes()) {
-    	addDockPane(groupDockPane);
+      addDockPane(groupDockPane);
     }
   }
 
@@ -342,6 +342,9 @@ public class DockManager {
   }
 
   public void showDockPane(DockPane dockPane) {
+    if (dockPane.getContent() == null) {
+      return;
+    }
     Window window = null;
     if (dockPane.getScene() != null) {
       window = dockPane.getScene().getWindow();
@@ -423,7 +426,7 @@ public class DockManager {
       if (dockPane.getGroupDockPane() != null) {
         setMenu(dockPane.getGroupDockPane());
       }
-      Menu menuItem = (Menu) menuMap.get(dockPane.getGroupId());
+      Menu menuItem = (Menu) menuMap.get(dockPane.getDockId());
       if (menuItem == null) {
         menuItem = new Menu(dockPane.getTitle());
         dockPane.setMenuItem(menuItem);
@@ -434,13 +437,13 @@ public class DockManager {
             showDockPane(dockPane);
           }
         });
-        menuMap.put(dockPane.getGroupId(), menuItem);
+        menuMap.put(dockPane.getDockId(), menuItem);
         if (dockPane.getGroupDockPane() != null) {
-            Menu parentMenu = (Menu) menuMap.get(dockPane.getGroupDockPane().getGroupId());
-            parentMenu.getItems().add(menuItem);
-          } else {
-        	  dockPaneMenu.getItems().add(menuItem);
-          }
+          Menu parentMenu = (Menu) menuMap.get(dockPane.getGroupDockPane().getDockId());
+          parentMenu.getItems().add(menuItem);
+        } else {
+          dockPaneMenu.getItems().add(menuItem);
+        }
       }
     }
 
