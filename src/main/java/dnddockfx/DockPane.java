@@ -1,11 +1,11 @@
-package dock;
+package dnddockfx;
 
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.util.List;
-import dock.DockManager.DockPaneTabContextMenu;
-import dock.DockManager.DockPaneTabDragOverContextMenu;
-import dock.DockManager.DockPos;
+import dnddockfx.DockManager.DockPaneTabContextMenu;
+import dnddockfx.DockManager.DockPaneTabDragOverContextMenu;
+import dnddockfx.DockManager.DockPos;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;

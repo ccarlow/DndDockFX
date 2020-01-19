@@ -1,4 +1,4 @@
-package dock;
+package dnddockfx;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import dock.DockPane.DockPaneTab;
+import dnddockfx.DockPane.DockPaneTab;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -320,7 +320,7 @@ public class DockManager {
     Stage stage = new Stage();
     stage.setTitle(dockPane.getTitle());
     stage.setScene(new Scene(tabPane));
-    stage.getScene().getStylesheets().add("/dock/default.css");
+    stage.getScene().getStylesheets().add("/dnddockfx/default.css");
 
     stage.show();
     stage.setX(dockPane.getOriginalStage().getX());

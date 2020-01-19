@@ -1,6 +1,6 @@
-package dock;
+package dnddockfx;
 
-import dock.DockManager.DockPos;
+import dnddockfx.DockManager.DockPos;
 import javafx.scene.control.TabPane;
 
 public class TabPaneDockPane extends ParentDockPane {

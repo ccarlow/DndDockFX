@@ -1,4 +1,4 @@
-package dock;
+package dnddockfx;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,8 @@
-package dock;
+package dnddockfx;
 
 import java.util.ArrayList;
 import java.util.List;
-import dock.DockManager.DockPos;
+import dnddockfx.DockManager.DockPos;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;

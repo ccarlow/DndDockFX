@@ -1,4 +1,4 @@
-package dock;
+package dnddockfx;
 
 import java.net.URL;
 import java.util.ResourceBundle;

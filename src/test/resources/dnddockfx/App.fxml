@@ -1,9 +1,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.*?>
-<?import dock.*?>
+<?import dnddockfx.*?>
 <?import javafx.scene.canvas.Canvas?>
-<DockPane fx:id="DockPane" title="Test" xmlns:fx="http://javafx.com/fxml" fx:controller="dock.AppController">
+<DockPane fx:id="DockPane" title="Test" xmlns:fx="http://javafx.com/fxml" fx:controller="dnddockfx.AppController">
 	<dockPanes>
 		<DockPane fx:id="childDockPane0" title="test0">
 			<content>

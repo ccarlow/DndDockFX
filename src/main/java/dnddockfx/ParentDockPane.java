@@ -1,7 +1,7 @@
-package dock;
+package dnddockfx;
 
 import java.util.UUID;
-import dock.DockManager.DockPos;
+import dnddockfx.DockManager.DockPos;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
