@@ -189,7 +189,7 @@ public class DockManager {
       dockPane.getOriginalStage().setY(dockLayout.getY());
       dockPane.getOriginalStage().setWidth(dockLayout.getWidth());
       dockPane.getOriginalStage().setHeight(dockLayout.getHeight());
-      if (!dockLayout.getIsClosed()) {
+      if (!dockLayout.getIsClosed() && dockPane.getContent() != null) {
         newDockStage(dockPane.getRootDockPane());
       }
     }

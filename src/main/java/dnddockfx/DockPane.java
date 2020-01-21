@@ -59,6 +59,7 @@ public class DockPane extends StackPane {
         if (c.next()) {
           for (DockPane node : c.getAddedSubList()) {
             node.setGroupDockPane(DockPane.this);
+            node.setDockManager(dockManager);
           }
         }
       }
